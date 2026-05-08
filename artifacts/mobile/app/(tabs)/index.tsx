@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
   componentLabel: { fontSize: 11, width: 58 },
   componentBarBg: { flex: 1, height: 4, borderRadius: 2, overflow: "hidden" },
   componentBarFill: { height: 4, borderRadius: 2 },
-  componentVal: { fontSize: 11, fontWeight: "600", width: 28, textAlign: "right" },
+  componentVal: { fontSize: 11, fontWeight: "600", minWidth: 38, textAlign: "right" },
   stripCard: {
     marginHorizontal: 20,
     marginBottom: 12,
