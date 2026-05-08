@@ -73,6 +73,10 @@ function RootLayoutNav() {
         name="add-account"
         options={{ presentation: "modal", animation: "slide_from_bottom" }}
       />
+      <Stack.Screen
+        name="alert-impact"
+        options={{ presentation: "modal", animation: "slide_from_bottom" }}
+      />
     </Stack>
   );
 }

@@ -1,5 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import { router } from "expo-router";
 import React from "react";
 import {
   Platform,
@@ -7,12 +8,36 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useAppContext, type Alert } from "@/context/AppContext";
 import { useColors } from "@/hooks/useColors";
+
+function routeForAlert(alert: Alert) {
+  const label = alert.actionLabel?.toLowerCase() ?? "";
+  if (label === "see impact") {
+    router.push({ pathname: "/alert-impact", params: { id: alert.id } });
+    return;
+  }
+  if (label === "view goal" || label === "adjust goal") {
+    if (alert.goalId) {
+      router.push({ pathname: "/goal-editor", params: { id: alert.goalId } });
+      return;
+    }
+  }
+  if (label === "review") {
+    router.push("/subscriptions-detail");
+    return;
+  }
+  if (alert.goalId) {
+    router.push({ pathname: "/goal-editor", params: { id: alert.goalId } });
+    return;
+  }
+  router.push({ pathname: "/alert-impact", params: { id: alert.id } });
+}
 
 const ALERT_CONFIG = {
   nudge: { icon: "zap" as const, color: "#2C7A7B", bg: "#EBF8F8" },
@@ -21,7 +46,7 @@ const ALERT_CONFIG = {
   info: { icon: "info" as const, color: "#64748B", bg: "#F0EDEA" },
 };
 
-function AlertCard({ alert, onPress }: { alert: Alert; onPress: () => void }) {
+function AlertCard({ alert, onOpen }: { alert: Alert; onOpen: () => void }) {
   const colors = useColors();
   const cfg = ALERT_CONFIG[alert.type];
   const isNew = !alert.read;
@@ -39,7 +64,7 @@ function AlertCard({ alert, onPress }: { alert: Alert; onPress: () => void }) {
       ]}
       onPress={() => {
         Haptics.selectionAsync();
-        onPress();
+        onOpen();
       }}
     >
       {isNew && (
@@ -56,7 +81,16 @@ function AlertCard({ alert, onPress }: { alert: Alert; onPress: () => void }) {
         <View style={styles.alertFooter}>
           <Text style={[styles.alertDate, { color: colors.mutedForeground }]}>{formatDate(alert.date)}</Text>
           {alert.actionLabel && (
-            <Text style={[styles.alertAction, { color: cfg.color }]}>{alert.actionLabel} →</Text>
+            <TouchableOpacity
+              hitSlop={8}
+              onPress={(e) => {
+                e.stopPropagation();
+                Haptics.selectionAsync();
+                onOpen();
+              }}
+            >
+              <Text style={[styles.alertAction, { color: cfg.color }]}>{alert.actionLabel} →</Text>
+            </TouchableOpacity>
           )}
         </View>
       </View>
@@ -113,14 +147,21 @@ export default function AlertsScreen() {
         <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>New</Text>
       )}
       {unread.map((a) => (
-        <AlertCard key={a.id} alert={a} onPress={() => markAlertRead(a.id)} />
+        <AlertCard
+          key={a.id}
+          alert={a}
+          onOpen={() => {
+            markAlertRead(a.id);
+            routeForAlert(a);
+          }}
+        />
       ))}
 
       {read.length > 0 && (
         <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>Earlier</Text>
       )}
       {read.map((a) => (
-        <AlertCard key={a.id} alert={a} onPress={() => {}} />
+        <AlertCard key={a.id} alert={a} onOpen={() => routeForAlert(a)} />
       ))}
 
       <View style={[styles.settingsHint, { backgroundColor: colors.muted }]}>
