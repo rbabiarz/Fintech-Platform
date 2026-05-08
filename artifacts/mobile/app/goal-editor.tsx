@@ -162,7 +162,7 @@ export default function GoalEditorScreen() {
       <View
         style={[
           styles.header,
-          { paddingTop: insets.top + 12, backgroundColor: colors.background, borderBottomColor: colors.border },
+          { paddingTop: insets.top + (Platform.OS === "web" ? 56 : 12), backgroundColor: colors.background, borderBottomColor: colors.border },
         ]}
       >
         <View style={styles.headerRow}>

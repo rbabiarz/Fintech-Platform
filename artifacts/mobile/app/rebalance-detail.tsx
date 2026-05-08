@@ -2,6 +2,7 @@ import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React from "react";
 import {
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -43,7 +44,7 @@ export default function RebalanceDetailScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={[styles.header, { paddingTop: insets.top + 12, borderBottomColor: colors.border }]}>
+      <View style={[styles.header, { paddingTop: insets.top + (Platform.OS === "web" ? 56 : 12), borderBottomColor: colors.border }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.iconBtn}>
           <Feather name="x" size={22} color={colors.navy} />
         </TouchableOpacity>

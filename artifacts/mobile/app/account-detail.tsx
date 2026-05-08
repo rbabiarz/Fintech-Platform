@@ -3,6 +3,7 @@ import * as Haptics from "expo-haptics";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import {
+  Platform,
   ScrollView,
   StyleSheet,
   Switch,
@@ -78,7 +79,7 @@ export default function AccountDetailScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={[styles.header, { paddingTop: insets.top + 12, borderBottomColor: colors.border }]}>
+      <View style={[styles.header, { paddingTop: insets.top + (Platform.OS === "web" ? 56 : 12), borderBottomColor: colors.border }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.iconBtn}>
           <Feather name="x" size={22} color={colors.navy} />
         </TouchableOpacity>

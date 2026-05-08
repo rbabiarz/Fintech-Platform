@@ -3,6 +3,7 @@ import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React, { useMemo, useState } from "react";
 import {
+  Platform,
   Modal,
   Pressable,
   ScrollView,
@@ -67,7 +68,7 @@ export default function SubscriptionsDetailScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={[styles.header, { paddingTop: insets.top + 12, borderBottomColor: colors.border }]}>
+      <View style={[styles.header, { paddingTop: insets.top + (Platform.OS === "web" ? 56 : 12), borderBottomColor: colors.border }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.iconBtn}>
           <Feather name="x" size={22} color={colors.navy} />
         </TouchableOpacity>
