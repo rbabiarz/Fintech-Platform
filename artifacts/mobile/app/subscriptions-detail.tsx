@@ -79,12 +79,8 @@ export default function SubscriptionsDetailScreen() {
         <View style={styles.iconBtn} />
       </View>
 
-      <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 60 }}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={[styles.summaryCard, { backgroundColor: colors.navy }]}>
+      <View style={[styles.stickySummaryWrap, { backgroundColor: colors.background, borderBottomColor: colors.border }]}>
+        <View style={[styles.summaryCard, { backgroundColor: colors.navy, marginBottom: 0 }]}>
           <Text style={{ color: "#B2DFDB", fontSize: 12, fontWeight: "700", letterSpacing: 0.6 }}>
             ACTIVE SUBSCRIPTIONS
           </Text>
@@ -95,7 +91,13 @@ export default function SubscriptionsDetailScreen() {
             ${(totalActive * 12).toFixed(0)} per year across {subs.filter((s) => s.active).length} services
           </Text>
         </View>
+      </View>
 
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: insets.bottom + 60 }}
+        showsVerticalScrollIndicator={false}
+      >
         {flaggedCount > 0 && (
           <View style={[styles.flagBanner, { backgroundColor: colors.cautionLight, borderColor: colors.caution }]}>
             <Feather name="alert-circle" size={16} color={colors.caution} />
@@ -172,6 +174,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: { fontSize: 17, fontWeight: "700" },
   iconBtn: { width: 36, height: 36, alignItems: "center", justifyContent: "center" },
+  stickySummaryWrap: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 16, borderBottomWidth: 1 },
   summaryCard: { borderRadius: 16, padding: 18, marginBottom: 16 },
   flagBanner: {
     flexDirection: "row",
