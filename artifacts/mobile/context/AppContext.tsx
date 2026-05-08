@@ -14,6 +14,7 @@ export interface Goal {
   monthlyContribution: number;
   category: string;
   pinned: boolean;
+  hidden?: boolean;
 }
 
 export interface Transaction {
@@ -76,7 +77,9 @@ interface AppState {
 interface AppContextType extends AppState {
   markAlertRead: (id: string) => void;
   updateGoal: (id: string, updates: Partial<Goal>) => void;
-  addGoal: (goal: Omit<Goal, "id">) => void;
+  addGoal: (goal: Omit<Goal, "id">) => string;
+  deleteGoal: (id: string) => void;
+  toggleGoalHidden: (id: string) => void;
 }
 
 const MOCK_GOALS: Goal[] = [
@@ -221,11 +224,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const addGoal = (goal: Omit<Goal, "id">) => {
-    const newGoal: Goal = {
-      ...goal,
-      id: `g_${Date.now()}`,
-    };
+    const id = `g_${Date.now()}`;
+    const newGoal: Goal = { ...goal, id };
     setGoals((prev) => [...prev, newGoal]);
+    return id;
+  };
+
+  const deleteGoal = (id: string) => {
+    setGoals((prev) => prev.filter((g) => g.id !== id));
+  };
+
+  const toggleGoalHidden = (id: string) => {
+    setGoals((prev) =>
+      prev.map((g) => (g.id === id ? { ...g, hidden: !g.hidden } : g))
+    );
   };
 
   return (
@@ -246,6 +258,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         markAlertRead,
         updateGoal,
         addGoal,
+        deleteGoal,
+        toggleGoalHidden,
       }}
     >
       {children}

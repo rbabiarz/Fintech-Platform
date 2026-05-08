@@ -32,6 +32,10 @@ function RootLayoutNav() {
       <Stack.Screen name="index" />
       <Stack.Screen name="(onboarding)" options={{ animation: "fade" }} />
       <Stack.Screen name="(tabs)" options={{ animation: "fade" }} />
+      <Stack.Screen
+        name="goal-editor"
+        options={{ presentation: "modal", animation: "slide_from_bottom" }}
+      />
     </Stack>
   );
 }
