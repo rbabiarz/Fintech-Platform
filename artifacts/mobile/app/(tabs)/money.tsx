@@ -9,6 +9,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -179,11 +180,17 @@ export default function MoneyScreen() {
   const insets = useSafeAreaInsets();
   const { transactions } = useAppContext();
   const [filter, setFilter] = useState<Filter>("all");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [query, setQuery] = useState("");
 
+  const q = query.trim().toLowerCase();
   const filtered = transactions.filter((tx) => {
-    if (filter === "all") return true;
-    if (filter === "aligned") return tx.alignment === "aligned";
-    if (filter === "out-of-sync") return tx.alignment === "out-of-sync";
+    if (filter === "aligned" && tx.alignment !== "aligned") return false;
+    if (filter === "out-of-sync" && tx.alignment !== "out-of-sync") return false;
+    if (q.length > 0) {
+      const hay = `${tx.merchant} ${tx.category} ${tx.account}`.toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
     return true;
   });
 
@@ -204,10 +211,54 @@ export default function MoneyScreen() {
       >
         <View style={styles.headerSection}>
           <Text style={[styles.headline, { color: colors.navy }]}>Money</Text>
-          <TouchableOpacity style={[styles.searchBtn, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <Feather name="search" size={18} color={colors.mutedForeground} />
+          <TouchableOpacity
+            style={[
+              styles.searchBtn,
+              {
+                backgroundColor: searchOpen ? colors.primary : colors.card,
+                borderColor: searchOpen ? colors.primary : colors.border,
+              },
+            ]}
+            onPress={() => {
+              Haptics.selectionAsync();
+              setSearchOpen((s) => {
+                if (s) setQuery("");
+                return !s;
+              });
+            }}
+          >
+            <Feather
+              name={searchOpen ? "x" : "search"}
+              size={18}
+              color={searchOpen ? "#fff" : colors.mutedForeground}
+            />
           </TouchableOpacity>
         </View>
+
+        {searchOpen && (
+          <View
+            style={[
+              styles.searchBar,
+              { backgroundColor: colors.card, borderColor: colors.border },
+            ]}
+          >
+            <Feather name="search" size={16} color={colors.mutedForeground} />
+            <TextInput
+              autoFocus
+              value={query}
+              onChangeText={setQuery}
+              placeholder="Search merchant, category, account"
+              placeholderTextColor={colors.mutedForeground}
+              style={[styles.searchInput, { color: colors.text }]}
+              returnKeyType="search"
+            />
+            {query.length > 0 && (
+              <TouchableOpacity onPress={() => setQuery("")} hitSlop={8}>
+                <Feather name="x-circle" size={16} color={colors.mutedForeground} />
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
 
         <SpendCategoryBar />
         <SubscriptionCard />
@@ -235,11 +286,20 @@ export default function MoneyScreen() {
           ))}
         </View>
 
-        <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>May 2026</Text>
+        <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>
+          {q.length > 0 ? `${filtered.length} result${filtered.length === 1 ? "" : "s"}` : "May 2026"}
+        </Text>
 
-        {filtered.map((tx) => (
-          <TransactionRow key={tx.id} tx={tx} />
-        ))}
+        {filtered.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Feather name="search" size={28} color={colors.mutedForeground} />
+            <Text style={{ color: colors.mutedForeground, fontSize: 13, marginTop: 8 }}>
+              No transactions match "{query}"
+            </Text>
+          </View>
+        ) : (
+          filtered.map((tx) => <TransactionRow key={tx.id} tx={tx} />)
+        )}
       </ScrollView>
     </View>
   );
@@ -301,6 +361,24 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   filterLabel: { fontSize: 13, fontWeight: "600" },
+  searchBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginHorizontal: 20,
+    marginBottom: 12,
+    paddingHorizontal: 14,
+    paddingVertical: Platform.OS === "web" ? 10 : 8,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 14,
+    padding: 0,
+    ...(Platform.OS === "web" ? ({ outlineStyle: "none" } as any) : null),
+  },
+  emptyState: { alignItems: "center", paddingVertical: 36 },
   sectionLabel: { fontSize: 12, fontWeight: "600", textTransform: "uppercase", paddingHorizontal: 20, marginBottom: 8, letterSpacing: 0.5 },
   txRow: {
     flexDirection: "row",
