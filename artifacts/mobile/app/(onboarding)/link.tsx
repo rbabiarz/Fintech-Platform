@@ -68,19 +68,19 @@ export default function LinkScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <ScrollView
-        contentContainerStyle={[
-          styles.scroll,
-          { paddingTop: insets.top + 12, paddingBottom: insets.bottom + 120 },
-        ]}
-        showsVerticalScrollIndicator={false}
-      >
+      <View style={[styles.header, { paddingTop: insets.top + 12, backgroundColor: colors.background, borderBottomColor: colors.border }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.back}>
           <Feather name="arrow-left" size={22} color={colors.navy} />
         </TouchableOpacity>
-
         <StepBar step={3} total={5} />
-
+      </View>
+      <ScrollView
+        contentContainerStyle={[
+          styles.scroll,
+          { paddingTop: 12, paddingBottom: insets.bottom + 120 },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
         <Text style={[styles.stepLabel, { color: colors.mutedForeground }]}>Step 3 of 5</Text>
         <Text style={[styles.headline, { color: colors.navy }]}>Connect your accounts</Text>
         <Text style={[styles.sub, { color: colors.mutedForeground }]}>
@@ -188,8 +188,9 @@ export default function LinkScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   scroll: { paddingHorizontal: 24 },
-  back: { marginBottom: 16, width: 36 },
-  stepBarWrap: { flexDirection: "row", gap: 4, marginBottom: 20 },
+  header: { paddingHorizontal: 24, paddingBottom: 14, borderBottomWidth: 1 },
+  back: { marginBottom: 12, width: 36 },
+  stepBarWrap: { flexDirection: "row", gap: 4 },
   stepSegment: { flex: 1, height: 4, borderRadius: 2 },
   stepLabel: { fontSize: 13, fontWeight: "500", marginBottom: 6 },
   headline: { fontSize: 28, fontWeight: "800", letterSpacing: -0.5, marginBottom: 8 },
