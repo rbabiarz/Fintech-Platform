@@ -1,9 +1,12 @@
 import { Feather } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert,
+  Modal,
   Platform,
+  Pressable,
   ScrollView,
   StyleSheet,
   Switch,
@@ -13,7 +16,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { useAppContext } from "@/context/AppContext";
+import { useAppContext, type ConnectedAccount } from "@/context/AppContext";
 import { useOnboarding } from "@/context/OnboardingContext";
 import { useColors } from "@/hooks/useColors";
 
@@ -22,43 +25,53 @@ function formatCurrency(n: number) {
   return `-$${Math.abs(n).toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
 }
 
-function AccountRow({
-  institution,
-  name,
-  type,
-  balance,
-  lastSync,
-}: {
-  institution: string;
-  name: string;
-  type: string;
-  balance: number;
-  lastSync: string;
-}) {
+function confirm(title: string, message: string, onConfirm: () => void, opts?: { confirmText?: string; destructive?: boolean }) {
+  if (Platform.OS === "web") {
+    if (window.confirm(`${title}\n\n${message}`)) onConfirm();
+    return;
+  }
+  Alert.alert(title, message, [
+    { text: "Cancel", style: "cancel" },
+    {
+      text: opts?.confirmText ?? "OK",
+      style: opts?.destructive ? "destructive" : "default",
+      onPress: onConfirm,
+    },
+  ]);
+}
+
+function AccountRow({ account }: { account: ConnectedAccount }) {
   const colors = useColors();
-  const typeIcon: Record<string, string> = {
+  const typeIcon: Record<string, React.ComponentProps<typeof Feather>["name"]> = {
     checking: "credit-card",
     savings: "shield",
     investment: "bar-chart-2",
     credit: "credit-card",
     mortgage: "home",
   };
-  const icon = (typeIcon[type] ?? "circle") as any;
-  const isNeg = balance < 0;
+  const icon = typeIcon[account.type] ?? "circle";
+  const isNeg = account.balance < 0;
 
   return (
-    <View style={[styles.acctRow, { borderBottomColor: colors.border }]}>
+    <Pressable
+      style={[styles.acctRow, { borderBottomColor: colors.border }]}
+      onPress={() => {
+        Haptics.selectionAsync();
+        router.push({ pathname: "/account-detail", params: { id: account.id } });
+      }}
+    >
       <View style={[styles.acctIcon, { backgroundColor: colors.muted }]}>
         <Feather name={icon} size={16} color={colors.primary} />
       </View>
       <View style={styles.acctInfo}>
-        <Text style={[styles.acctName, { color: colors.text }]}>{name}</Text>
-        <Text style={[styles.acctInst, { color: colors.mutedForeground }]}>{institution} · synced {lastSync}</Text>
+        <Text style={[styles.acctName, { color: colors.text }]}>{account.name}</Text>
+        <Text style={[styles.acctInst, { color: colors.mutedForeground }]}>{account.institution} · synced {account.lastSync}</Text>
       </View>
       <Text style={[styles.acctBalance, { color: isNeg ? colors.caution : colors.navy }]}>
-        {formatCurrency(balance)}
+        {formatCurrency(account.balance)}
       </Text>
-    </View>
+      <Feather name="chevron-right" size={16} color={colors.mutedForeground} />
+    </Pressable>
   );
 }
 
@@ -68,7 +81,7 @@ function SettingRow({
   value,
   onPress,
 }: {
-  icon: any;
+  icon: React.ComponentProps<typeof Feather>["name"];
   label: string;
   value?: string;
   onPress?: () => void;
@@ -96,7 +109,7 @@ function ToggleRow({
   value,
   onChange,
 }: {
-  icon: any;
+  icon: React.ComponentProps<typeof Feather>["name"];
   label: string;
   value: boolean;
   onChange: (v: boolean) => void;
@@ -118,6 +131,23 @@ function ToggleRow({
   );
 }
 
+const ALERT_OPTIONS = ["Real-time", "Daily digest", "Weekly digest", "Off"];
+const RISK_OPTIONS = [
+  { id: "conservative", label: "Conservative", sub: "Capital preservation, low volatility" },
+  { id: "moderate", label: "Moderate", sub: "Balanced growth and stability" },
+  { id: "moderate-aggressive", label: "Moderate Aggressive", sub: "Growth-leaning, some volatility" },
+  { id: "aggressive", label: "Aggressive", sub: "Maximum growth, higher volatility" },
+];
+const REGION_OPTIONS = [
+  { id: "us", label: "USD · United States", flag: "🇺🇸" },
+  { id: "ca", label: "CAD · Canada", flag: "🇨🇦" },
+  { id: "uk", label: "GBP · United Kingdom", flag: "🇬🇧" },
+  { id: "eu", label: "EUR · European Union", flag: "🇪🇺" },
+  { id: "au", label: "AUD · Australia", flag: "🇦🇺" },
+];
+
+type PickerKind = null | "alerts" | "risk" | "region";
+
 export default function ProfileScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
@@ -128,116 +158,276 @@ export default function ProfileScreen() {
   const [biometric, setBiometric] = useState(false);
   const [mlConsent, setMlConsent] = useState(true);
 
+  const [alertFreq, setAlertFreq] = useState("Weekly digest");
+  const [risk, setRisk] = useState(riskProfile ?? "moderate");
+  const [region, setRegion] = useState("us");
+  const [picker, setPicker] = useState<PickerKind>(null);
+
   const displayName = name || userName;
 
-  const riskLabel: Record<string, string> = {
-    conservative: "Conservative",
-    moderate: "Moderate",
-    "moderate-aggressive": "Moderate Aggressive",
-    aggressive: "Aggressive",
-  };
+  const riskCurrent = RISK_OPTIONS.find((r) => r.id === risk) ?? RISK_OPTIONS[1];
+  const regionCurrent = REGION_OPTIONS.find((r) => r.id === region) ?? REGION_OPTIONS[0];
 
   const handleResetOnboarding = () => {
-    if (Platform.OS === "web") {
-      resetOnboarding().then(() => router.replace("/(onboarding)/welcome"));
-      return;
-    }
-    Alert.alert(
+    confirm(
       "Restart onboarding?",
       "This will take you back through the setup flow. Your data won't be affected.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Restart",
-          onPress: () => resetOnboarding().then(() => router.replace("/(onboarding)/welcome")),
-        },
-      ]
+      () => resetOnboarding().then(() => router.replace("/(onboarding)/welcome")),
+      { confirmText: "Restart" },
     );
   };
 
+  const handleDelete = () => {
+    confirm(
+      "Delete account?",
+      "This permanently removes all goals, transactions, and preferences. This cannot be undone.",
+      () => {
+        confirm(
+          "Are you absolutely sure?",
+          "Type-confirmation isn't required, but once deleted there's no recovery.",
+          () => router.replace("/(onboarding)/welcome"),
+          { confirmText: "Delete forever", destructive: true },
+        );
+      },
+      { confirmText: "Continue", destructive: true },
+    );
+  };
+
+  const handleExport = () => {
+    confirm(
+      "Export your data?",
+      "We'll email a download link to sarah.chen@email.com within 24 hours.",
+      () => {},
+      { confirmText: "Request export" },
+    );
+  };
+
+  const handleUpgrade = () => {
+    confirm(
+      "Upgrade to Align Plus",
+      "Unlock unlimited goals, advanced scenarios, and priority support for $9/mo.",
+      () => {},
+      { confirmText: "See plans" },
+    );
+  };
+
+  const closePicker = () => setPicker(null);
+
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: colors.background }]}
-      contentContainerStyle={{
-        paddingTop: insets.top + (Platform.OS === "web" ? 67 : 12),
-        paddingBottom: insets.bottom + 100,
-      }}
-      showsVerticalScrollIndicator={false}
-    >
-      <View style={styles.headerSection}>
-        <Text style={[styles.headline, { color: colors.navy }]}>Profile</Text>
-      </View>
+    <>
+      <ScrollView
+        style={[styles.container, { backgroundColor: colors.background }]}
+        contentContainerStyle={{
+          paddingTop: insets.top + (Platform.OS === "web" ? 67 : 12),
+          paddingBottom: insets.bottom + 100,
+        }}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.headerSection}>
+          <Text style={[styles.headline, { color: colors.navy }]}>Profile</Text>
+        </View>
 
-      <View style={[styles.avatarCard, { backgroundColor: colors.navy }]}>
-        <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
-          <Text style={styles.avatarText}>{displayName.charAt(0).toUpperCase()}</Text>
+        <View style={[styles.avatarCard, { backgroundColor: colors.navy }]}>
+          <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
+            <Text style={styles.avatarText}>{displayName.charAt(0).toUpperCase()}</Text>
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.avatarName, { color: "#fff" }]}>{displayName} Chen</Text>
+            <Text style={[styles.avatarEmail, { color: colors.primaryTint }]}>sarah.chen@email.com</Text>
+          </View>
+          <TouchableOpacity
+            style={[styles.premiumBadge, { backgroundColor: colors.primary }]}
+            onPress={handleUpgrade}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.premiumText}>Free</Text>
+          </TouchableOpacity>
         </View>
-        <View style={{ flex: 1 }}>
-          <Text style={[styles.avatarName, { color: "#fff" }]}>{displayName} Chen</Text>
-          <Text style={[styles.avatarEmail, { color: colors.primaryTint }]}>sarah.chen@email.com</Text>
-        </View>
-        <View style={[styles.premiumBadge, { backgroundColor: colors.primary }]}>
-          <Text style={styles.premiumText}>Free</Text>
-        </View>
-      </View>
 
-      <View style={styles.sectionHeader}>
-        <Text style={[styles.sectionTitle, { color: colors.navy }]}>Connected Accounts</Text>
-        <TouchableOpacity>
-          <Text style={[styles.seeAll, { color: colors.primary }]}>+ Add</Text>
+        <View style={styles.sectionHeader}>
+          <Text style={[styles.sectionTitle, { color: colors.navy }]}>Connected Accounts</Text>
+          <TouchableOpacity
+            onPress={() => {
+              Haptics.selectionAsync();
+              router.push("/add-account");
+            }}
+          >
+            <Text style={[styles.seeAll, { color: colors.primary }]}>+ Add</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={[styles.card, { borderColor: colors.border }]}>
+          {accounts.map((acct) => (
+            <AccountRow key={acct.id} account={acct} />
+          ))}
+        </View>
+
+        <View style={styles.sectionHeader}>
+          <Text style={[styles.sectionTitle, { color: colors.navy }]}>Preferences</Text>
+        </View>
+
+        <View style={[styles.card, { borderColor: colors.border }]}>
+          <ToggleRow icon="bell" label="Quiet alerts by default" value={quietAlerts} onChange={setQuietAlerts} />
+          <ToggleRow icon="lock" label="Biometric login" value={biometric} onChange={setBiometric} />
+          <SettingRow
+            icon="target"
+            label="Alert frequency"
+            value={alertFreq}
+            onPress={() => setPicker("alerts")}
+          />
+          <SettingRow
+            icon="sliders"
+            label="Risk profile"
+            value={riskCurrent.label}
+            onPress={() => setPicker("risk")}
+          />
+          <SettingRow
+            icon="globe"
+            label="Currency & region"
+            value={regionCurrent.label.split(" · ")[0]}
+            onPress={() => setPicker("region")}
+          />
+        </View>
+
+        <View style={styles.sectionHeader}>
+          <Text style={[styles.sectionTitle, { color: colors.navy }]}>Privacy & Data</Text>
+        </View>
+
+        <View style={[styles.card, { borderColor: colors.border }]}>
+          <ToggleRow icon="cpu" label="Allow anonymized ML training" value={mlConsent} onChange={setMlConsent} />
+          <SettingRow
+            icon="eye"
+            label="What data we hold"
+            onPress={() => router.push({ pathname: "/info-detail", params: { topic: "what-data" } })}
+          />
+          <SettingRow icon="download" label="Export my data" onPress={handleExport} />
+          <SettingRow
+            icon="book-open"
+            label="Privacy policy"
+            onPress={() => router.push({ pathname: "/info-detail", params: { topic: "privacy-policy" } })}
+          />
+        </View>
+
+        <View style={styles.sectionHeader}>
+          <Text style={[styles.sectionTitle, { color: colors.navy }]}>About</Text>
+        </View>
+
+        <View style={[styles.card, { borderColor: colors.border }]}>
+          <SettingRow
+            icon="book"
+            label="Goal Alignment methodology"
+            onPress={() => router.push({ pathname: "/info-detail", params: { topic: "alignment-methodology" } })}
+          />
+          <SettingRow
+            icon="cpu"
+            label="How AI guidance works"
+            onPress={() => router.push({ pathname: "/info-detail", params: { topic: "ai-guidance" } })}
+          />
+          <SettingRow
+            icon="shield"
+            label="Security practices"
+            onPress={() => router.push({ pathname: "/info-detail", params: { topic: "security" } })}
+          />
+          <SettingRow
+            icon="help-circle"
+            label="Support"
+            onPress={() => router.push({ pathname: "/info-detail", params: { topic: "support" } })}
+          />
+          <SettingRow icon="rotate-ccw" label="Restart onboarding" onPress={handleResetOnboarding} />
+        </View>
+
+        <TouchableOpacity
+          style={[styles.deleteRow, { borderColor: colors.destructive }]}
+          onPress={handleDelete}
+          activeOpacity={0.85}
+        >
+          <Feather name="trash-2" size={16} color={colors.destructive} />
+          <Text style={[styles.deleteText, { color: colors.destructive }]}>Delete account</Text>
         </TouchableOpacity>
-      </View>
 
-      <View style={[styles.card, { borderColor: colors.border }]}>
-        {accounts.map((acct) => (
-          <AccountRow key={acct.id} {...acct} />
-        ))}
-      </View>
+        <Text style={[styles.version, { color: colors.mutedForeground }]}>
+          Align v1.0.0 · Educational reference, not personalized investment advice.
+        </Text>
+      </ScrollView>
 
-      <View style={styles.sectionHeader}>
-        <Text style={[styles.sectionTitle, { color: colors.navy }]}>Preferences</Text>
-      </View>
+      <Modal visible={picker !== null} transparent animationType="slide" onRequestClose={closePicker}>
+        <Pressable style={styles.sheetBackdrop} onPress={closePicker}>
+          <Pressable
+            style={[
+              styles.sheet,
+              { backgroundColor: colors.background, paddingBottom: insets.bottom + 24 },
+            ]}
+            onPress={(e) => e.stopPropagation()}
+          >
+            <View style={[styles.sheetHandle, { backgroundColor: colors.border }]} />
+            <View style={styles.sheetHeader}>
+              <Text style={[styles.sheetTitle, { color: colors.navy }]}>
+                {picker === "alerts" ? "Alert frequency" : picker === "risk" ? "Risk profile" : "Currency & region"}
+              </Text>
+              <TouchableOpacity
+                onPress={closePicker}
+                hitSlop={10}
+                style={[styles.sheetCloseBtn, { backgroundColor: colors.muted }]}
+              >
+                <Feather name="x" size={18} color={colors.text} />
+              </TouchableOpacity>
+            </View>
 
-      <View style={[styles.card, { borderColor: colors.border }]}>
-        <ToggleRow icon="bell" label="Quiet alerts by default" value={quietAlerts} onChange={setQuietAlerts} />
-        <ToggleRow icon="lock" label="Biometric login" value={biometric} onChange={setBiometric} />
-        <SettingRow icon="target" label="Alert frequency" value="Weekly digest" />
-        <SettingRow icon="sliders" label="Risk profile" value={riskLabel[riskProfile ?? "moderate"] ?? "Moderate"} />
-        <SettingRow icon="globe" label="Currency & region" value="USD · US" />
-      </View>
+            {picker === "alerts" &&
+              ALERT_OPTIONS.map((opt) => (
+                <TouchableOpacity
+                  key={opt}
+                  style={[styles.optRow, { borderBottomColor: colors.border }]}
+                  onPress={() => {
+                    Haptics.selectionAsync();
+                    setAlertFreq(opt);
+                    closePicker();
+                  }}
+                >
+                  <Text style={[styles.optLabel, { color: colors.text }]}>{opt}</Text>
+                  {alertFreq === opt && <Feather name="check" size={18} color={colors.primary} />}
+                </TouchableOpacity>
+              ))}
 
-      <View style={styles.sectionHeader}>
-        <Text style={[styles.sectionTitle, { color: colors.navy }]}>Privacy & Data</Text>
-      </View>
+            {picker === "risk" &&
+              RISK_OPTIONS.map((opt) => (
+                <TouchableOpacity
+                  key={opt.id}
+                  style={[styles.optRow, { borderBottomColor: colors.border }]}
+                  onPress={() => {
+                    Haptics.selectionAsync();
+                    setRisk(opt.id as typeof risk);
+                    closePicker();
+                  }}
+                >
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.optLabel, { color: colors.text }]}>{opt.label}</Text>
+                    <Text style={[styles.optSub, { color: colors.mutedForeground }]}>{opt.sub}</Text>
+                  </View>
+                  {risk === opt.id && <Feather name="check" size={18} color={colors.primary} />}
+                </TouchableOpacity>
+              ))}
 
-      <View style={[styles.card, { borderColor: colors.border }]}>
-        <ToggleRow icon="cpu" label="Allow anonymized ML training" value={mlConsent} onChange={setMlConsent} />
-        <SettingRow icon="eye" label="What data we hold" />
-        <SettingRow icon="download" label="Export my data" />
-        <SettingRow icon="book-open" label="Privacy policy" />
-      </View>
-
-      <View style={styles.sectionHeader}>
-        <Text style={[styles.sectionTitle, { color: colors.navy }]}>About</Text>
-      </View>
-
-      <View style={[styles.card, { borderColor: colors.border }]}>
-        <SettingRow icon="book" label="Goal Alignment methodology" />
-        <SettingRow icon="cpu" label="How AI guidance works" />
-        <SettingRow icon="shield" label="Security practices" />
-        <SettingRow icon="help-circle" label="Support" />
-        <SettingRow icon="rotate-ccw" label="Restart onboarding" onPress={handleResetOnboarding} />
-      </View>
-
-      <TouchableOpacity style={[styles.deleteRow, { borderColor: colors.destructive }]}>
-        <Feather name="trash-2" size={16} color={colors.destructive} />
-        <Text style={[styles.deleteText, { color: colors.destructive }]}>Delete account</Text>
-      </TouchableOpacity>
-
-      <Text style={[styles.version, { color: colors.mutedForeground }]}>
-        Align v1.0.0 · Educational reference, not personalized investment advice.
-      </Text>
-    </ScrollView>
+            {picker === "region" &&
+              REGION_OPTIONS.map((opt) => (
+                <TouchableOpacity
+                  key={opt.id}
+                  style={[styles.optRow, { borderBottomColor: colors.border }]}
+                  onPress={() => {
+                    Haptics.selectionAsync();
+                    setRegion(opt.id);
+                    closePicker();
+                  }}
+                >
+                  <Text style={{ fontSize: 22, marginRight: 12 }}>{opt.flag}</Text>
+                  <Text style={[styles.optLabel, { color: colors.text, flex: 1 }]}>{opt.label}</Text>
+                  {region === opt.id && <Feather name="check" size={18} color={colors.primary} />}
+                </TouchableOpacity>
+              ))}
+          </Pressable>
+        </Pressable>
+      </Modal>
+    </>
   );
 }
 
@@ -323,4 +513,46 @@ const styles = StyleSheet.create({
   },
   deleteText: { fontSize: 14, fontWeight: "600" },
   version: { textAlign: "center", fontSize: 11, marginBottom: 8 },
+  sheetBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(15,42,74,0.45)",
+    justifyContent: "flex-end",
+  },
+  sheet: {
+    borderTopLeftRadius: 22,
+    borderTopRightRadius: 22,
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    maxHeight: "86%",
+  },
+  sheetHandle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    alignSelf: "center",
+    marginBottom: 14,
+  },
+  sheetHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 6,
+  },
+  sheetTitle: { fontSize: 18, fontWeight: "700" },
+  sheetCloseBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  optRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+  },
+  optLabel: { fontSize: 15, fontWeight: "600" },
+  optSub: { fontSize: 12, marginTop: 2 },
 });
