@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
   scroll: { paddingHorizontal: 24 },
   header: { paddingHorizontal: 24, paddingBottom: 14, borderBottomWidth: 1 },
   back: { marginBottom: 12, width: 36 },
-  stepBarWrap: { flexDirection: "row", gap: 4 },
+  stepBarWrap: { flexDirection: "row", gap: 4, marginBottom: 14 },
   stepSegment: { flex: 1, height: 4, borderRadius: 2 },
   stepLabel: { fontSize: 13, fontWeight: "500", marginBottom: 6 },
   headline: { fontSize: 28, fontWeight: "800", letterSpacing: -0.5, marginBottom: 8 },
