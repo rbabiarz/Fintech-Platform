@@ -1,5 +1,7 @@
 import { Feather } from "@expo/vector-icons";
-import React, { useState } from "react";
+import * as Haptics from "expo-haptics";
+import { router } from "expo-router";
+import React from "react";
 import {
   Platform,
   Pressable,
@@ -88,7 +90,14 @@ function GoalMapping() {
     <View style={[styles.mappingCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
       <Text style={[styles.mappingTitle, { color: colors.navy }]}>Goal-Portfolio Mapping</Text>
       {mappings.map((m, i) => (
-        <View key={i} style={[styles.mappingRow, i < mappings.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.border }]}>
+        <Pressable
+          key={i}
+          style={[styles.mappingRow, i < mappings.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.border }]}
+          onPress={() => {
+            Haptics.selectionAsync();
+            router.push({ pathname: "/goal-editor", params: { id: m.goal.id } });
+          }}
+        >
           <Text style={styles.mappingEmoji}>{m.goal.emoji}</Text>
           <View style={styles.mappingInfo}>
             <Text style={[styles.mappingGoal, { color: colors.text }]}>{m.goal.title}</Text>
@@ -99,7 +108,8 @@ function GoalMapping() {
               {m.pct}% aligned
             </Text>
           </View>
-        </View>
+          <Feather name="chevron-right" size={16} color={colors.mutedForeground} />
+        </Pressable>
       ))}
     </View>
   );
@@ -111,7 +121,13 @@ function HoldingRow({ holding }: { holding: Holding }) {
   const cfg = CLASS_CONFIG[holding.assetClass];
 
   return (
-    <Pressable style={[styles.holdingRow, { backgroundColor: colors.card, borderColor: colors.border }]}>
+    <Pressable
+      style={[styles.holdingRow, { backgroundColor: colors.card, borderColor: colors.border }]}
+      onPress={() => {
+        Haptics.selectionAsync();
+        router.push({ pathname: "/holding-detail", params: { id: holding.id } });
+      }}
+    >
       <View style={[styles.holdingIcon, { backgroundColor: `${cfg.color}18` }]}>
         <Text style={[styles.holdingTicker, { color: cfg.color }]}>{holding.ticker.slice(0, 2)}</Text>
       </View>
@@ -148,9 +164,24 @@ export default function InvestScreen() {
     >
       <View style={styles.headerSection}>
         <Text style={[styles.headline, { color: colors.navy }]}>Invest</Text>
+        <TouchableOpacity
+          style={[styles.headerIcon, { backgroundColor: colors.card, borderColor: colors.border }]}
+          onPress={() => {
+            Haptics.selectionAsync();
+            router.push("/portfolio-performance");
+          }}
+        >
+          <Feather name="bar-chart-2" size={18} color={colors.navy} />
+        </TouchableOpacity>
       </View>
 
-      <View style={[styles.portfolioCard, { backgroundColor: colors.navy }]}>
+      <Pressable
+        style={[styles.portfolioCard, { backgroundColor: colors.navy }]}
+        onPress={() => {
+          Haptics.selectionAsync();
+          router.push("/portfolio-performance");
+        }}
+      >
         <Text style={[styles.portLabel, { color: colors.primaryTint }]}>Total Portfolio Value</Text>
         <Text style={[styles.portValue, { color: "#fff" }]}>{formatCurrency(totalInvested)}</Text>
         <View style={[styles.changePill, { backgroundColor: isPositive ? "#15803D" : "#B91C1C" }]}>
@@ -158,9 +189,9 @@ export default function InvestScreen() {
           <Text style={styles.changePillText}>{isPositive ? "+" : ""}{formatCurrency(totalChange)} today</Text>
         </View>
         <Text style={[styles.portDisclaimer, { color: "rgba(178,223,219,0.7)" }]}>
-          Across 1 linked investment account
+          Across 1 linked investment account · Tap for performance
         </Text>
-      </View>
+      </Pressable>
 
       <AllocationBar holdings={holdings} />
       <GoalMapping />
@@ -181,7 +212,12 @@ export default function InvestScreen() {
         <Text style={[styles.driftBody, { color: colors.text }]}>
           Your equity allocation (77%) is 2% above your educational reference for a 25-year horizon. Consider reviewing during your next rebalance.
         </Text>
-        <TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            Haptics.selectionAsync();
+            router.push("/rebalance-detail");
+          }}
+        >
           <Text style={[styles.driftLink, { color: colors.caution }]}>Learn about rebalancing →</Text>
         </TouchableOpacity>
       </View>
@@ -191,8 +227,22 @@ export default function InvestScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  headerSection: { paddingHorizontal: 20, paddingBottom: 14 },
+  headerSection: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingBottom: 14,
+  },
   headline: { fontSize: 28, fontWeight: "700" },
+  headerIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   portfolioCard: {
     marginHorizontal: 20,
     marginBottom: 12,
