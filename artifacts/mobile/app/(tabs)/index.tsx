@@ -223,13 +223,6 @@ export default function GoalsScreen() {
           <Text style={[styles.greeting, { color: colors.mutedForeground }]}>{today}</Text>
           <Text style={[styles.headline, { color: colors.navy }]}>Good morning, {userName}</Text>
         </View>
-        <TouchableOpacity
-          style={[styles.addBtn, { backgroundColor: colors.primary }]}
-          onPress={() => router.push("/goal-editor")}
-          activeOpacity={0.85}
-        >
-          <Feather name="plus" size={20} color="#fff" />
-        </TouchableOpacity>
       </View>
 
       <AlignmentScoreRing score={alignmentScore} trend={alignmentTrend} />
@@ -243,7 +236,7 @@ export default function GoalsScreen() {
           onPress={() => router.push("/goal-editor")}
         >
           <Feather name="plus" size={14} color={colors.primary} />
-          <Text style={[styles.seeAll, { color: colors.primary }]}>Add goal</Text>
+          <Text style={[styles.seeAll, { color: colors.primary }]}>Add Goal</Text>
         </TouchableOpacity>
       </View>
 
