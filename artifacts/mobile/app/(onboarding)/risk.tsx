@@ -152,19 +152,20 @@ export default function RiskScreen() {
           <Feather name="arrow-left" size={22} color={colors.navy} />
         </TouchableOpacity>
         <StepBar step={4} total={5} />
+        <Text style={[styles.stepLabel, { color: colors.mutedForeground }]}>Step 4 of 5</Text>
+        <Text style={[styles.headline, { color: colors.navy }]}>
+          {showResult ? "Your risk profile" : "Let's understand your risk comfort"}
+        </Text>
       </View>
       <ScrollView
         contentContainerStyle={[
           styles.scroll,
-          { paddingTop: 12, paddingBottom: insets.bottom + 120 },
+          { paddingTop: 16, paddingBottom: insets.bottom + 120 },
         ]}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={[styles.stepLabel, { color: colors.mutedForeground }]}>Step 4 of 5</Text>
-
         {!showResult ? (
           <>
-            <Text style={[styles.headline, { color: colors.navy }]}>Let's understand your risk comfort</Text>
             <Text style={[styles.sub, { color: colors.mutedForeground }]}>
               5 quick questions · About 60 seconds. This shapes how we frame investment guidance for you.
             </Text>
@@ -225,7 +226,6 @@ export default function RiskScreen() {
           </>
         ) : (
           <>
-            <Text style={[styles.headline, { color: colors.navy }]}>Your risk profile</Text>
             <Text style={[styles.sub, { color: colors.mutedForeground }]}>
               Based on your answers, here's how we'll frame investment guidance for you.
             </Text>

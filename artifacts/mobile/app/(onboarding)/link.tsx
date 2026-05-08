@@ -73,16 +73,16 @@ export default function LinkScreen() {
           <Feather name="arrow-left" size={22} color={colors.navy} />
         </TouchableOpacity>
         <StepBar step={3} total={5} />
+        <Text style={[styles.stepLabel, { color: colors.mutedForeground }]}>Step 3 of 5</Text>
+        <Text style={[styles.headline, { color: colors.navy }]}>Connect your accounts</Text>
       </View>
       <ScrollView
         contentContainerStyle={[
           styles.scroll,
-          { paddingTop: 12, paddingBottom: insets.bottom + 120 },
+          { paddingTop: 16, paddingBottom: insets.bottom + 120 },
         ]}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={[styles.stepLabel, { color: colors.mutedForeground }]}>Step 3 of 5</Text>
-        <Text style={[styles.headline, { color: colors.navy }]}>Connect your accounts</Text>
         <Text style={[styles.sub, { color: colors.mutedForeground }]}>
           Link at least one account so Align can build your personalized financial picture. The more you link, the clearer the view.
         </Text>

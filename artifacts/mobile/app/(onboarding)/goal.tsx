@@ -81,17 +81,17 @@ export default function GoalScreen() {
           <Feather name="arrow-left" size={22} color={colors.navy} />
         </TouchableOpacity>
         <StepBar step={2} total={5} />
+        <Text style={[styles.stepLabel, { color: colors.mutedForeground }]}>Step 2 of 5</Text>
+        <Text style={[styles.headline, { color: colors.navy }]}>What are you working toward?</Text>
       </View>
       <ScrollView
         contentContainerStyle={[
           styles.scroll,
-          { paddingTop: 12, paddingBottom: insets.bottom + 130 },
+          { paddingTop: 16, paddingBottom: insets.bottom + 130 },
         ]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <Text style={[styles.stepLabel, { color: colors.mutedForeground }]}>Step 2 of 5</Text>
-        <Text style={[styles.headline, { color: colors.navy }]}>What are you working toward?</Text>
         <Text style={[styles.sub, { color: colors.mutedForeground }]}>
           Pick your first life goal. You can add more anytime.
         </Text>

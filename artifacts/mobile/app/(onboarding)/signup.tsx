@@ -70,16 +70,16 @@ export default function SignupScreen() {
           <Feather name="arrow-left" size={22} color={colors.navy} />
         </TouchableOpacity>
         <StepBar step={1} total={5} />
+        <Text style={[styles.stepLabel, { color: colors.mutedForeground }]}>Step 1 of 5</Text>
+        <Text style={[styles.headline, { color: colors.navy }]}>Create your account</Text>
       </View>
       <ScrollView
         contentContainerStyle={[
           styles.scroll,
-          { paddingTop: 12, paddingBottom: insets.bottom + 24 },
+          { paddingTop: 16, paddingBottom: insets.bottom + 24 },
         ]}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={[styles.stepLabel, { color: colors.mutedForeground }]}>Step 1 of 5</Text>
-        <Text style={[styles.headline, { color: colors.navy }]}>Create your account</Text>
         <Text style={[styles.sub, { color: colors.mutedForeground }]}>
           Your data is encrypted and only used to power your personalized guidance.
         </Text>
