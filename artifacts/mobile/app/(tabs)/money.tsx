@@ -204,7 +204,7 @@ export default function MoneyScreen() {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView
         contentContainerStyle={{
-          paddingTop: insets.top + (Platform.OS === "web" ? 67 : 12),
+          paddingTop: insets.top + (Platform.OS === "web" ? 67 : 20),
           paddingBottom: insets.bottom + 100,
         }}
         showsVerticalScrollIndicator={false}
