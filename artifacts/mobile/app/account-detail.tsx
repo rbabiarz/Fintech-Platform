@@ -3,8 +3,6 @@ import * as Haptics from "expo-haptics";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import {
-  Alert,
-  Platform,
   ScrollView,
   StyleSheet,
   Switch,
@@ -15,6 +13,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useAppContext } from "@/context/AppContext";
+import { useConfirm } from "@/context/ConfirmContext";
 import { useColors } from "@/hooks/useColors";
 
 const TYPE_LABEL: Record<string, string> = {
@@ -38,21 +37,11 @@ function formatCurrency(n: number) {
   return `$${n.toLocaleString()}`;
 }
 
-function confirm(title: string, message: string, onConfirm: () => void, destructive = false) {
-  if (Platform.OS === "web") {
-    if (window.confirm(`${title}\n\n${message}`)) onConfirm();
-    return;
-  }
-  Alert.alert(title, message, [
-    { text: "Cancel", style: "cancel" },
-    { text: destructive ? "Disconnect" : "OK", style: destructive ? "destructive" : "default", onPress: onConfirm },
-  ]);
-}
-
 export default function AccountDetailScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { accounts } = useAppContext();
+  const confirm = useConfirm();
   const params = useLocalSearchParams<{ id?: string }>();
 
   const account = accounts.find((a) => a.id === params.id) ?? accounts[0];
@@ -68,13 +57,15 @@ export default function AccountDetailScreen() {
     setTimeout(() => setSyncing(false), 1200);
   };
 
-  const handleDisconnect = () => {
-    confirm(
-      "Disconnect account?",
-      `${account.institution} ${account.name} will stop syncing. You can re-link it any time.`,
-      () => router.back(),
-      true,
-    );
+  const handleDisconnect = async () => {
+    const ok = await confirm({
+      title: "Disconnect account?",
+      message: `${account.institution} ${account.name} will stop syncing. You can re-link it any time.`,
+      confirmText: "Disconnect",
+      tone: "destructive",
+      icon: "link-2",
+    });
+    if (ok) router.back();
   };
 
   const meta = [

@@ -3,7 +3,6 @@ import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
-  Alert,
   Modal,
   Platform,
   Pressable,
@@ -17,27 +16,13 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useAppContext, type ConnectedAccount } from "@/context/AppContext";
+import { useConfirm } from "@/context/ConfirmContext";
 import { useOnboarding } from "@/context/OnboardingContext";
 import { useColors } from "@/hooks/useColors";
 
 function formatCurrency(n: number) {
   if (n >= 0) return `$${n.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
   return `-$${Math.abs(n).toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
-}
-
-function confirm(title: string, message: string, onConfirm: () => void, opts?: { confirmText?: string; destructive?: boolean }) {
-  if (Platform.OS === "web") {
-    if (window.confirm(`${title}\n\n${message}`)) onConfirm();
-    return;
-  }
-  Alert.alert(title, message, [
-    { text: "Cancel", style: "cancel" },
-    {
-      text: opts?.confirmText ?? "OK",
-      style: opts?.destructive ? "destructive" : "default",
-      onPress: onConfirm,
-    },
-  ]);
 }
 
 function AccountRow({ account }: { account: ConnectedAccount }) {
@@ -153,6 +138,7 @@ export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const { accounts, userName } = useAppContext();
   const { resetOnboarding, riskProfile, name } = useOnboarding();
+  const confirm = useConfirm();
 
   const [quietAlerts, setQuietAlerts] = useState(true);
   const [biometric, setBiometric] = useState(false);
@@ -168,47 +154,53 @@ export default function ProfileScreen() {
   const riskCurrent = RISK_OPTIONS.find((r) => r.id === risk) ?? RISK_OPTIONS[1];
   const regionCurrent = REGION_OPTIONS.find((r) => r.id === region) ?? REGION_OPTIONS[0];
 
-  const handleResetOnboarding = () => {
-    confirm(
-      "Restart onboarding?",
-      "This will take you back through the setup flow. Your data won't be affected.",
-      () => resetOnboarding().then(() => router.replace("/(onboarding)/welcome")),
-      { confirmText: "Restart" },
-    );
+  const handleResetOnboarding = async () => {
+    const ok = await confirm({
+      title: "Restart onboarding?",
+      message: "This will take you back through the setup flow. Your data won't be affected.",
+      confirmText: "Restart",
+      icon: "rotate-ccw",
+    });
+    if (!ok) return;
+    await resetOnboarding();
+    router.replace("/(onboarding)/welcome");
   };
 
-  const handleDelete = () => {
-    confirm(
-      "Delete account?",
-      "This permanently removes all goals, transactions, and preferences. This cannot be undone.",
-      () => {
-        confirm(
-          "Are you absolutely sure?",
-          "Type-confirmation isn't required, but once deleted there's no recovery.",
-          () => router.replace("/(onboarding)/welcome"),
-          { confirmText: "Delete forever", destructive: true },
-        );
-      },
-      { confirmText: "Continue", destructive: true },
-    );
+  const handleDelete = async () => {
+    const ok1 = await confirm({
+      title: "Delete account?",
+      message: "This permanently removes all goals, transactions, and preferences. This cannot be undone.",
+      confirmText: "Continue",
+      tone: "destructive",
+      icon: "trash-2",
+    });
+    if (!ok1) return;
+    const ok2 = await confirm({
+      title: "Are you absolutely sure?",
+      message: "Once deleted there's no recovery.",
+      confirmText: "Delete forever",
+      tone: "destructive",
+      icon: "alert-triangle",
+    });
+    if (ok2) router.replace("/(onboarding)/welcome");
   };
 
-  const handleExport = () => {
-    confirm(
-      "Export your data?",
-      "We'll email a download link to sarah.chen@email.com within 24 hours.",
-      () => {},
-      { confirmText: "Request export" },
-    );
+  const handleExport = async () => {
+    await confirm({
+      title: "Export your data?",
+      message: "We'll email a download link to sarah.chen@email.com within 24 hours.",
+      confirmText: "Request export",
+      icon: "download",
+    });
   };
 
-  const handleUpgrade = () => {
-    confirm(
-      "Upgrade to Align Plus",
-      "Unlock unlimited goals, advanced scenarios, and priority support for $9/mo.",
-      () => {},
-      { confirmText: "See plans" },
-    );
+  const handleUpgrade = async () => {
+    await confirm({
+      title: "Upgrade to Align Plus",
+      message: "Unlock unlimited goals, advanced scenarios, and priority support for $9/mo.",
+      confirmText: "See plans",
+      icon: "star",
+    });
   };
 
   const closePicker = () => setPicker(null);

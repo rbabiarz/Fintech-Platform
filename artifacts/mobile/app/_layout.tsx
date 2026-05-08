@@ -16,6 +16,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AppProvider } from "@/context/AppContext";
+import { ConfirmProvider } from "@/context/ConfirmContext";
 import { OnboardingProvider } from "@/context/OnboardingContext";
 
 if (process.env.EXPO_PUBLIC_DOMAIN) {
@@ -100,7 +101,9 @@ export default function RootLayout() {
             <AppProvider>
               <GestureHandlerRootView>
                 <KeyboardProvider>
-                  <RootLayoutNav />
+                  <ConfirmProvider>
+                    <RootLayoutNav />
+                  </ConfirmProvider>
                 </KeyboardProvider>
               </GestureHandlerRootView>
             </AppProvider>

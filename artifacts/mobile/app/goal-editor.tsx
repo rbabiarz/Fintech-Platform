@@ -3,7 +3,6 @@ import * as Haptics from "expo-haptics";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -17,6 +16,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useAppContext, type Goal, type GoalStatus } from "@/context/AppContext";
+import { useConfirm } from "@/context/ConfirmContext";
 import { useColors } from "@/hooks/useColors";
 
 const GOAL_TEMPLATES = [
@@ -52,6 +52,7 @@ export default function GoalEditorScreen() {
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ id?: string }>();
   const { goals, addGoal, updateGoal, deleteGoal, toggleGoalHidden } = useAppContext();
+  const confirm = useConfirm();
 
   const editingGoal = useMemo(
     () => (params.id ? goals.find((g) => g.id === params.id) : undefined),
@@ -133,24 +134,19 @@ export default function GoalEditorScreen() {
     router.back();
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!editingGoal) return;
-    Alert.alert(
-      "Delete goal?",
-      `"${editingGoal.title}" will be removed permanently. This can't be undone.`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: () => {
-            deleteGoal(editingGoal.id);
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-            router.back();
-          },
-        },
-      ]
-    );
+    const ok = await confirm({
+      title: "Delete goal?",
+      message: `"${editingGoal.title}" will be removed permanently. This can't be undone.`,
+      confirmText: "Delete",
+      tone: "destructive",
+      icon: "trash-2",
+    });
+    if (!ok) return;
+    deleteGoal(editingGoal.id);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+    router.back();
   };
 
   const handleAmountInput = (val: string, set: (n: number) => void) => {
