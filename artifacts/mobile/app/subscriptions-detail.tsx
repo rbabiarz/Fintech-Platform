@@ -3,8 +3,8 @@ import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React, { useMemo, useState } from "react";
 import {
-  Alert,
-  Platform,
+  Modal,
+  Pressable,
   ScrollView,
   StyleSheet,
   Switch,
@@ -40,6 +40,7 @@ export default function SubscriptionsDetailScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const [subs, setSubs] = useState<Sub[]>(INITIAL);
+  const [confirmTarget, setConfirmTarget] = useState<Sub | null>(null);
 
   const totalActive = useMemo(
     () => subs.filter((s) => s.active).reduce((sum, s) => sum + s.amount, 0),
@@ -52,30 +53,16 @@ export default function SubscriptionsDetailScreen() {
     setSubs((prev) => prev.map((s) => (s.id === id ? { ...s, active: !s.active } : s)));
   };
 
-  const confirmCancel = (sub: Sub) => {
-    setSubs((prev) => prev.filter((s) => s.id !== sub.id));
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  const cancelSub = (sub: Sub) => {
+    Haptics.selectionAsync();
+    setConfirmTarget(sub);
   };
 
-  const cancelSub = (sub: Sub) => {
-    const title = `Cancel ${sub.name}?`;
-    const body = `Save $${(sub.amount * 12).toFixed(0)}/yr — we'll guide you to ${sub.name}'s cancel page.`;
-
-    if (Platform.OS === "web") {
-      if (typeof window !== "undefined" && window.confirm(`${title}\n\n${body}`)) {
-        confirmCancel(sub);
-      }
-      return;
-    }
-
-    Alert.alert(title, body, [
-      { text: "Not now", style: "cancel" },
-      {
-        text: "Cancel subscription",
-        style: "destructive",
-        onPress: () => confirmCancel(sub),
-      },
-    ]);
+  const confirmCancel = () => {
+    if (!confirmTarget) return;
+    setSubs((prev) => prev.filter((s) => s.id !== confirmTarget.id));
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    setConfirmTarget(null);
   };
 
   return (
@@ -167,6 +154,52 @@ export default function SubscriptionsDetailScreen() {
           </View>
         ))}
       </ScrollView>
+
+      <Modal
+        visible={confirmTarget !== null}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setConfirmTarget(null)}
+      >
+        <Pressable style={styles.backdrop} onPress={() => setConfirmTarget(null)}>
+          <Pressable
+            style={[styles.dialog, { backgroundColor: colors.card }]}
+            onPress={(e) => e.stopPropagation()}
+          >
+            <View style={[styles.dialogIcon, { backgroundColor: colors.cautionLight }]}>
+              <Feather name="alert-triangle" size={22} color={colors.caution} />
+            </View>
+            <Text style={[styles.dialogTitle, { color: colors.navy }]}>
+              Cancel {confirmTarget?.name}?
+            </Text>
+            <Text style={[styles.dialogBody, { color: colors.mutedForeground }]}>
+              You'll save{" "}
+              <Text style={{ fontWeight: "700", color: colors.text }}>
+                ${((confirmTarget?.amount ?? 0) * 12).toFixed(0)}/yr
+              </Text>
+              . We'll guide you to {confirmTarget?.name}'s cancel page to finish the process.
+            </Text>
+            <View style={styles.dialogActions}>
+              <TouchableOpacity
+                style={[styles.dialogBtn, { backgroundColor: colors.muted }]}
+                onPress={() => setConfirmTarget(null)}
+                activeOpacity={0.85}
+              >
+                <Text style={{ color: colors.text, fontWeight: "700", fontSize: 14 }}>Not now</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.dialogBtn, { backgroundColor: colors.caution }]}
+                onPress={confirmCancel}
+                activeOpacity={0.85}
+              >
+                <Text style={{ color: "#fff", fontWeight: "700", fontSize: 14 }}>
+                  Cancel subscription
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -217,4 +250,35 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
   toggleRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+  backdrop: {
+    flex: 1,
+    backgroundColor: "rgba(15,42,74,0.45)",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 24,
+  },
+  dialog: {
+    width: "100%",
+    maxWidth: 360,
+    borderRadius: 18,
+    padding: 22,
+    alignItems: "center",
+  },
+  dialogIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 14,
+  },
+  dialogTitle: { fontSize: 18, fontWeight: "700", textAlign: "center", marginBottom: 8 },
+  dialogBody: { fontSize: 13, lineHeight: 19, textAlign: "center", marginBottom: 20 },
+  dialogActions: { flexDirection: "row", gap: 10, width: "100%" },
+  dialogBtn: {
+    flex: 1,
+    paddingVertical: 13,
+    borderRadius: 12,
+    alignItems: "center",
+  },
 });
