@@ -273,6 +273,13 @@ function NextBestActionCard() {
                       A few ways you could put this into motion
                     </Text>
                   </View>
+                  <TouchableOpacity
+                    onPress={close}
+                    hitSlop={10}
+                    style={[styles.sheetCloseBtn, { backgroundColor: colors.muted }]}
+                  >
+                    <Feather name="x" size={18} color={colors.text} />
+                  </TouchableOpacity>
                 </View>
 
                 <View style={{ gap: 10 }}>
@@ -318,13 +325,6 @@ function NextBestActionCard() {
                   ))}
                 </View>
 
-                <TouchableOpacity
-                  style={[styles.sheetCta, { backgroundColor: colors.primary }]}
-                  onPress={close}
-                  activeOpacity={0.85}
-                >
-                  <Text style={styles.sheetCtaText}>Continue</Text>
-                </TouchableOpacity>
               </>
             ) : sheet === "why" ? (
               <>
