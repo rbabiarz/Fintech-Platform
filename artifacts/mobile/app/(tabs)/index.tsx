@@ -157,12 +157,9 @@ function NetWorthStrip() {
   );
 }
 
-function NextActionCard() {
+function NextActionCard({ onDismiss }: { onDismiss: () => void }) {
   const colors = useColors();
-  const [dismissed, setDismissed] = useState(false);
   const [expanded, setExpanded] = useState(false);
-
-  if (dismissed) return null;
 
   return (
     <View style={[styles.actionCard, { backgroundColor: "#EBF8F8", borderColor: colors.primary, borderWidth: 1 }]}>
@@ -171,7 +168,7 @@ function NextActionCard() {
           <Feather name="zap" size={14} color="#fff" />
         </View>
         <Text style={[styles.actionTitle, { color: colors.navy }]}>Suggested next step</Text>
-        <TouchableOpacity onPress={() => setDismissed(true)}>
+        <TouchableOpacity onPress={onDismiss}>
           <Feather name="x" size={18} color={colors.mutedForeground} />
         </TouchableOpacity>
       </View>
@@ -210,6 +207,7 @@ export default function GoalsScreen() {
   const today = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
 
   const [showHidden, setShowHidden] = useState(false);
+  const [suggestionDismissed, setSuggestionDismissed] = useState(false);
 
   return (
     <ScrollView
@@ -277,11 +275,14 @@ export default function GoalsScreen() {
         </>
       )}
 
-      <View style={styles.sectionHeader}>
-        <Text style={[styles.sectionTitle, { color: colors.navy }]}>Suggested next step</Text>
-      </View>
-
-      <NextActionCard />
+      {!suggestionDismissed && (
+        <>
+          <View style={styles.sectionHeader}>
+            <Text style={[styles.sectionTitle, { color: colors.navy }]}>Suggested next step</Text>
+          </View>
+          <NextActionCard onDismiss={() => setSuggestionDismissed(true)} />
+        </>
+      )}
 
       <View style={styles.sectionHeader}>
         <Text style={[styles.sectionTitle, { color: colors.navy }]}>What's changed</Text>
