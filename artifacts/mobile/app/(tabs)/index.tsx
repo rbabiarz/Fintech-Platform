@@ -1,10 +1,8 @@
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import {
-  Animated,
   Platform,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -80,46 +78,6 @@ function GoalCard({ goal }: { goal: Goal }) {
   );
 }
 
-function AlignmentScoreWidget({ score, trend }: { score: number; trend: number }) {
-  const colors = useColors();
-  const radius = 44;
-  const circumference = 2 * Math.PI * radius;
-  const strokeDash = circumference - (score / 100) * circumference;
-
-  return (
-    <View style={[styles.scoreCard, { backgroundColor: colors.navy }]}>
-      <View style={styles.scoreLeft}>
-        <Text style={[styles.scoreLabel, { color: colors.primaryTint }]}>Goal Alignment Score</Text>
-        <View style={styles.scoreRow}>
-          <Text style={[styles.scoreNumber, { color: "#FFFFFF" }]}>{score}</Text>
-          <View style={[styles.trendBadge, { backgroundColor: trend >= 0 ? "#15803D" : "#B91C1C" }]}>
-            <Feather name={trend >= 0 ? "trending-up" : "trending-down"} size={11} color="#fff" />
-            <Text style={styles.trendText}>{Math.abs(trend)} pts</Text>
-          </View>
-        </View>
-        <Text style={[styles.scoreSubtext, { color: colors.primaryTint }]}>vs. last month</Text>
-      </View>
-      <View style={styles.scoreChart}>
-        <svg_placeholder />
-        <View style={styles.circleContainer}>
-          <View style={[styles.circleOuter, { borderColor: "rgba(178,223,219,0.2)" }]}>
-            <View
-              style={[
-                styles.circleInner,
-                {
-                  borderColor: colors.primary,
-                  borderRightColor: "transparent",
-                  transform: [{ rotate: `${(score / 100) * 360 - 90}deg` }],
-                },
-              ]}
-            />
-          </View>
-          <Text style={[styles.circleScore, { color: "#FFFFFF" }]}>{score}</Text>
-        </View>
-      </View>
-    </View>
-  );
-}
 
 function AlignmentScoreRing({ score, trend }: { score: number; trend: number }) {
   const colors = useColors();

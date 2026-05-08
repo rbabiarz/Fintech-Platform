@@ -92,6 +92,12 @@ export default function SignupScreen() {
             <TouchableOpacity
               key={btn.label}
               style={[styles.ssoBtn, { borderColor: colors.border, backgroundColor: colors.card }]}
+              onPress={() => {
+                setField("name", "Sarah");
+                setField("email", "sarah@example.com");
+                router.push("/(onboarding)/goal");
+              }}
+              activeOpacity={0.75}
             >
               <Feather name={btn.icon} size={18} color={colors.text} />
               <Text style={[styles.ssoBtnText, { color: colors.text }]}>{btn.label}</Text>
