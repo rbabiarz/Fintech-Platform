@@ -79,7 +79,7 @@ export default function GoalScreen() {
       <ScrollView
         contentContainerStyle={[
           styles.scroll,
-          { paddingTop: insets.top + 12, paddingBottom: insets.bottom + 24 },
+          { paddingTop: insets.top + 12, paddingBottom: insets.bottom + 130 },
         ]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -188,7 +188,14 @@ export default function GoalScreen() {
             </Text>
           </View>
         </View>
+      </ScrollView>
 
+      <View
+        style={[
+          styles.footer,
+          { backgroundColor: colors.background, borderTopColor: colors.border, paddingBottom: insets.bottom + 16 },
+        ]}
+      >
         <TouchableOpacity
           style={[styles.primaryBtn, { backgroundColor: colors.navy }]}
           onPress={handleContinue}
@@ -197,7 +204,7 @@ export default function GoalScreen() {
           <Text style={styles.primaryBtnText}>Continue</Text>
           <Feather name="arrow-right" size={18} color="#fff" />
         </TouchableOpacity>
-      </ScrollView>
+      </View>
     </KeyboardAvoidingView>
   );
 }
@@ -253,4 +260,13 @@ const styles = StyleSheet.create({
     paddingVertical: 17,
   },
   primaryBtnText: { color: "#fff", fontSize: 16, fontWeight: "700" },
+  footer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    borderTopWidth: 1,
+    paddingHorizontal: 24,
+    paddingTop: 14,
+  },
 });
