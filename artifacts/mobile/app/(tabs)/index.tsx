@@ -214,7 +214,7 @@ export default function GoalsScreen() {
     <ScrollView
       style={[styles.container, { backgroundColor: colors.background }]}
       contentContainerStyle={{
-        paddingTop: insets.top + (Platform.OS === "web" ? 67 : 0),
+        paddingTop: insets.top,
         paddingBottom: insets.bottom + 100,
       }}
       showsVerticalScrollIndicator={false}
