@@ -338,6 +338,13 @@ function NextBestActionCard() {
                       The signals behind this Next Best Action
                     </Text>
                   </View>
+                  <TouchableOpacity
+                    onPress={close}
+                    hitSlop={10}
+                    style={[styles.sheetCloseBtn, { backgroundColor: colors.muted }]}
+                  >
+                    <Feather name="x" size={18} color={colors.text} />
+                  </TouchableOpacity>
                 </View>
 
                 <View style={{ gap: 12 }}>
@@ -690,6 +697,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   sheetCtaText: { color: "#fff", fontSize: 15, fontWeight: "700" },
+  sheetCloseBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   whyRow: { borderRadius: 12, borderWidth: 1, padding: 14 },
   whyRowLabel: {
     fontSize: 11,
