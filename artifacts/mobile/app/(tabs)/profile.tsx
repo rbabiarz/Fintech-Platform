@@ -1,6 +1,8 @@
 import { Feather } from "@expo/vector-icons";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import {
+  Alert,
   Platform,
   ScrollView,
   StyleSheet,
@@ -12,6 +14,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useAppContext } from "@/context/AppContext";
+import { useOnboarding } from "@/context/OnboardingContext";
 import { useColors } from "@/hooks/useColors";
 
 function formatCurrency(n: number) {
@@ -64,13 +67,11 @@ function SettingRow({
   label,
   value,
   onPress,
-  showArrow = true,
 }: {
   icon: any;
   label: string;
   value?: string;
   onPress?: () => void;
-  showArrow?: boolean;
 }) {
   const colors = useColors();
   return (
@@ -84,12 +85,22 @@ function SettingRow({
       </View>
       <Text style={[styles.settingLabel, { color: colors.text }]}>{label}</Text>
       {value && <Text style={[styles.settingValue, { color: colors.mutedForeground }]}>{value}</Text>}
-      {showArrow && <Feather name="chevron-right" size={16} color={colors.border} />}
+      <Feather name="chevron-right" size={16} color={colors.border} />
     </TouchableOpacity>
   );
 }
 
-function ToggleRow({ icon, label, value, onChange }: { icon: any; label: string; value: boolean; onChange: (v: boolean) => void }) {
+function ToggleRow({
+  icon,
+  label,
+  value,
+  onChange,
+}: {
+  icon: any;
+  label: string;
+  value: boolean;
+  onChange: (v: boolean) => void;
+}) {
   const colors = useColors();
   return (
     <View style={[styles.settingRow, { borderBottomColor: colors.border }]}>
@@ -111,10 +122,38 @@ export default function ProfileScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { accounts, userName } = useAppContext();
+  const { resetOnboarding, riskProfile, name } = useOnboarding();
 
   const [quietAlerts, setQuietAlerts] = useState(true);
   const [biometric, setBiometric] = useState(false);
   const [mlConsent, setMlConsent] = useState(true);
+
+  const displayName = name || userName;
+
+  const riskLabel: Record<string, string> = {
+    conservative: "Conservative",
+    moderate: "Moderate",
+    "moderate-aggressive": "Moderate Aggressive",
+    aggressive: "Aggressive",
+  };
+
+  const handleResetOnboarding = () => {
+    if (Platform.OS === "web") {
+      resetOnboarding().then(() => router.replace("/(onboarding)/welcome"));
+      return;
+    }
+    Alert.alert(
+      "Restart onboarding?",
+      "This will take you back through the setup flow. Your data won't be affected.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Restart",
+          onPress: () => resetOnboarding().then(() => router.replace("/(onboarding)/welcome")),
+        },
+      ]
+    );
+  };
 
   return (
     <ScrollView
@@ -131,10 +170,10 @@ export default function ProfileScreen() {
 
       <View style={[styles.avatarCard, { backgroundColor: colors.navy }]}>
         <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
-          <Text style={styles.avatarText}>{userName.charAt(0)}</Text>
+          <Text style={styles.avatarText}>{displayName.charAt(0).toUpperCase()}</Text>
         </View>
-        <View>
-          <Text style={[styles.avatarName, { color: "#fff" }]}>{userName} Chen</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={[styles.avatarName, { color: "#fff" }]}>{displayName} Chen</Text>
           <Text style={[styles.avatarEmail, { color: colors.primaryTint }]}>sarah.chen@email.com</Text>
         </View>
         <View style={[styles.premiumBadge, { backgroundColor: colors.primary }]}>
@@ -163,7 +202,7 @@ export default function ProfileScreen() {
         <ToggleRow icon="bell" label="Quiet alerts by default" value={quietAlerts} onChange={setQuietAlerts} />
         <ToggleRow icon="lock" label="Biometric login" value={biometric} onChange={setBiometric} />
         <SettingRow icon="target" label="Alert frequency" value="Weekly digest" />
-        <SettingRow icon="sliders" label="Risk tolerance" value="Moderate" />
+        <SettingRow icon="sliders" label="Risk profile" value={riskLabel[riskProfile ?? "moderate"] ?? "Moderate"} />
         <SettingRow icon="globe" label="Currency & region" value="USD · US" />
       </View>
 
@@ -187,6 +226,7 @@ export default function ProfileScreen() {
         <SettingRow icon="cpu" label="How AI guidance works" />
         <SettingRow icon="shield" label="Security practices" />
         <SettingRow icon="help-circle" label="Support" />
+        <SettingRow icon="rotate-ccw" label="Restart onboarding" onPress={handleResetOnboarding} />
       </View>
 
       <TouchableOpacity style={[styles.deleteRow, { borderColor: colors.destructive }]}>
@@ -225,7 +265,6 @@ const styles = StyleSheet.create({
   avatarName: { fontSize: 17, fontWeight: "700" },
   avatarEmail: { fontSize: 13, marginTop: 2 },
   premiumBadge: {
-    marginLeft: "auto" as any,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
