@@ -79,7 +79,7 @@ export default function LinkScreen() {
       <ScrollView
         contentContainerStyle={[
           styles.scroll,
-          { paddingTop: 16, paddingBottom: insets.bottom + 120 },
+          { paddingTop: 16, paddingBottom: insets.bottom + 200 },
         ]}
         showsVerticalScrollIndicator={false}
       >
