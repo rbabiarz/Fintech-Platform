@@ -3,6 +3,7 @@ import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -198,6 +199,191 @@ function NextActionCard({ onDismiss }: { onDismiss: () => void }) {
   );
 }
 
+type SheetKind = null | "explore" | "why";
+
+function NextBestActionCard() {
+  const colors = useColors();
+  const insets = useSafeAreaInsets();
+  const [sheet, setSheet] = useState<SheetKind>(null);
+
+  const close = () => setSheet(null);
+
+  return (
+    <>
+      <View style={[styles.nbaCard, { backgroundColor: colors.navy }]}>
+        <View style={styles.nbaHeader}>
+          <View style={[styles.nbaIcon, { backgroundColor: "rgba(178,223,219,0.18)" }]}>
+            <Feather name="compass" size={16} color="#B2DFDB" />
+          </View>
+          <Text style={[styles.nbaKicker, { color: "#B2DFDB" }]}>NEXT BEST ACTION</Text>
+        </View>
+        <Text style={styles.nbaTitle}>Move $4,200 from Checking into your Emergency Fund</Text>
+        <Text style={styles.nbaBody}>
+          You're carrying a higher-than-needed cash buffer. Topping up your emergency fund gets you to a full 6-month runway and improves your alignment score.
+        </Text>
+        <View style={styles.nbaButtons}>
+          <TouchableOpacity
+            style={[styles.nbaBtn, { backgroundColor: colors.primary }]}
+            onPress={() => {
+              Haptics.selectionAsync();
+              setSheet("explore");
+            }}
+            activeOpacity={0.85}
+          >
+            <Feather name="arrow-up-right" size={15} color="#fff" />
+            <Text style={styles.nbaBtnPrimary}>Explore</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.nbaBtn, { backgroundColor: "rgba(255,255,255,0.08)" }]}
+            onPress={() => {
+              Haptics.selectionAsync();
+              setSheet("why");
+            }}
+            activeOpacity={0.85}
+          >
+            <Feather name="help-circle" size={15} color="#fff" />
+            <Text style={styles.nbaBtnSecondary}>Why</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <Modal visible={sheet !== null} transparent animationType="slide" onRequestClose={close}>
+        <Pressable style={styles.sheetBackdrop} onPress={close}>
+          <Pressable
+            style={[
+              styles.sheet,
+              {
+                backgroundColor: colors.background,
+                paddingBottom: insets.bottom + 24,
+              },
+            ]}
+            onPress={(e) => e.stopPropagation()}
+          >
+            <View style={[styles.sheetHandle, { backgroundColor: colors.border }]} />
+
+            {sheet === "explore" ? (
+              <>
+                <View style={styles.sheetHeader}>
+                  <View style={[styles.sheetIcon, { backgroundColor: "#EBF8F8" }]}>
+                    <Feather name="arrow-up-right" size={18} color={colors.primary} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.sheetTitle, { color: colors.navy }]}>Explore this action</Text>
+                    <Text style={[styles.sheetSub, { color: colors.mutedForeground }]}>
+                      A few ways you could put this into motion
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={{ gap: 10 }}>
+                  {[
+                    {
+                      icon: "zap" as const,
+                      title: "Move $4,200 today",
+                      sub: "One-tap transfer to Emergency Fund",
+                      pill: "Recommended",
+                      pillColor: colors.primary,
+                    },
+                    {
+                      icon: "calendar" as const,
+                      title: "Spread it across 3 months",
+                      sub: "$1,400/mo from Checking",
+                      pill: "Gentler",
+                      pillColor: colors.mutedForeground,
+                    },
+                    {
+                      icon: "target" as const,
+                      title: "Send half, save half",
+                      sub: "$2,100 to fund · $2,100 to investing",
+                      pill: "Balanced",
+                      pillColor: colors.mutedForeground,
+                    },
+                  ].map((opt) => (
+                    <TouchableOpacity
+                      key={opt.title}
+                      style={[styles.sheetOption, { backgroundColor: colors.card, borderColor: colors.border }]}
+                      activeOpacity={0.85}
+                    >
+                      <View style={[styles.sheetOptionIcon, { backgroundColor: "#EBF8F8" }]}>
+                        <Feather name={opt.icon} size={16} color={colors.primary} />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={[styles.sheetOptionTitle, { color: colors.text }]}>{opt.title}</Text>
+                        <Text style={[styles.sheetOptionSub, { color: colors.mutedForeground }]}>{opt.sub}</Text>
+                      </View>
+                      <View style={[styles.sheetPill, { backgroundColor: opt.pillColor + "1A" }]}>
+                        <Text style={{ color: opt.pillColor, fontSize: 11, fontWeight: "700" }}>{opt.pill}</Text>
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                <TouchableOpacity
+                  style={[styles.sheetCta, { backgroundColor: colors.primary }]}
+                  onPress={close}
+                  activeOpacity={0.85}
+                >
+                  <Text style={styles.sheetCtaText}>Continue</Text>
+                </TouchableOpacity>
+              </>
+            ) : sheet === "why" ? (
+              <>
+                <View style={styles.sheetHeader}>
+                  <View style={[styles.sheetIcon, { backgroundColor: "#EBF8F8" }]}>
+                    <Feather name="help-circle" size={18} color={colors.primary} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.sheetTitle, { color: colors.navy }]}>Why this suggestion?</Text>
+                    <Text style={[styles.sheetSub, { color: colors.mutedForeground }]}>
+                      The signals behind this Next Best Action
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={{ gap: 12 }}>
+                  {[
+                    {
+                      label: "Cash buffer",
+                      value: "Checking holds $11,800 — 2.3× your monthly burn",
+                    },
+                    {
+                      label: "Emergency runway",
+                      value: "Currently 4.1 months · target 6 months",
+                    },
+                    {
+                      label: "Opportunity cost",
+                      value: "Idle cash earning 0.01% vs. 4.5% in your high-yield fund",
+                    },
+                    {
+                      label: "Alignment lift",
+                      value: "Estimated +6 pts on your Goal Alignment Score",
+                    },
+                  ].map((row) => (
+                    <View
+                      key={row.label}
+                      style={[styles.whyRow, { backgroundColor: colors.card, borderColor: colors.border }]}
+                    >
+                      <Text style={[styles.whyRowLabel, { color: colors.mutedForeground }]}>{row.label}</Text>
+                      <Text style={[styles.whyRowValue, { color: colors.text }]}>{row.value}</Text>
+                    </View>
+                  ))}
+                </View>
+
+                <View style={[styles.whyFooter, { backgroundColor: "#EBF8F8" }]}>
+                  <Feather name="info" size={14} color={colors.primary} />
+                  <Text style={[styles.whyFooterText, { color: colors.navy }]}>
+                    We refresh this suggestion daily based on your latest balances, spending pace, and goal targets.
+                  </Text>
+                </View>
+              </>
+            ) : null}
+          </Pressable>
+        </Pressable>
+      </Modal>
+    </>
+  );
+}
+
 export default function GoalsScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
@@ -297,6 +483,8 @@ export default function GoalsScreen() {
           </View>
         </View>
       ))}
+
+      <NextBestActionCard />
 
     </ScrollView>
   );
@@ -436,4 +624,88 @@ const styles = StyleSheet.create({
   changeIcon: { width: 32, height: 32, borderRadius: 16, alignItems: "center", justifyContent: "center" },
   changeText: { fontSize: 13, lineHeight: 18 },
   changeTime: { fontSize: 11, marginTop: 3 },
+  nbaCard: {
+    marginHorizontal: 20,
+    marginTop: 16,
+    marginBottom: 12,
+    borderRadius: 18,
+    padding: 18,
+  },
+  nbaHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 12 },
+  nbaIcon: { width: 28, height: 28, borderRadius: 14, alignItems: "center", justifyContent: "center" },
+  nbaKicker: { fontSize: 11, fontWeight: "700", letterSpacing: 0.8 },
+  nbaTitle: { color: "#fff", fontSize: 18, fontWeight: "700", lineHeight: 24, marginBottom: 8 },
+  nbaBody: { color: "#B2DFDB", fontSize: 13, lineHeight: 19, marginBottom: 16 },
+  nbaButtons: { flexDirection: "row", gap: 10 },
+  nbaBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
+  nbaBtnPrimary: { color: "#fff", fontSize: 14, fontWeight: "700" },
+  nbaBtnSecondary: { color: "#fff", fontSize: 14, fontWeight: "700" },
+  sheetBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(15,42,74,0.45)",
+    justifyContent: "flex-end",
+  },
+  sheet: {
+    borderTopLeftRadius: 22,
+    borderTopRightRadius: 22,
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    maxHeight: "86%",
+  },
+  sheetHandle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    alignSelf: "center",
+    marginBottom: 14,
+  },
+  sheetHeader: { flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 18 },
+  sheetIcon: { width: 38, height: 38, borderRadius: 19, alignItems: "center", justifyContent: "center" },
+  sheetTitle: { fontSize: 18, fontWeight: "700" },
+  sheetSub: { fontSize: 13, marginTop: 2 },
+  sheetOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    padding: 14,
+  },
+  sheetOptionIcon: { width: 34, height: 34, borderRadius: 17, alignItems: "center", justifyContent: "center" },
+  sheetOptionTitle: { fontSize: 14, fontWeight: "700" },
+  sheetOptionSub: { fontSize: 12, marginTop: 2 },
+  sheetPill: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 10 },
+  sheetCta: {
+    marginTop: 18,
+    borderRadius: 14,
+    paddingVertical: 16,
+    alignItems: "center",
+  },
+  sheetCtaText: { color: "#fff", fontSize: 15, fontWeight: "700" },
+  whyRow: { borderRadius: 12, borderWidth: 1, padding: 14 },
+  whyRowLabel: {
+    fontSize: 11,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
+    marginBottom: 4,
+  },
+  whyRowValue: { fontSize: 13, lineHeight: 19, fontWeight: "600" },
+  whyFooter: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 8,
+    borderRadius: 12,
+    padding: 12,
+    marginTop: 16,
+  },
+  whyFooterText: { fontSize: 12, lineHeight: 17, flex: 1 },
 });
