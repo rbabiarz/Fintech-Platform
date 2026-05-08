@@ -4,6 +4,7 @@ import { router } from "expo-router";
 import React, { useMemo, useState } from "react";
 import {
   Alert,
+  Platform,
   ScrollView,
   StyleSheet,
   Switch,
@@ -51,22 +52,30 @@ export default function SubscriptionsDetailScreen() {
     setSubs((prev) => prev.map((s) => (s.id === id ? { ...s, active: !s.active } : s)));
   };
 
+  const confirmCancel = (sub: Sub) => {
+    setSubs((prev) => prev.filter((s) => s.id !== sub.id));
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  };
+
   const cancelSub = (sub: Sub) => {
-    Alert.alert(
-      `Cancel ${sub.name}?`,
-      `Save ${(sub.amount * 12).toFixed(0)}/yr — we'll guide you to ${sub.name}'s cancel page.`,
-      [
-        { text: "Not now", style: "cancel" },
-        {
-          text: "Cancel subscription",
-          style: "destructive",
-          onPress: () => {
-            setSubs((prev) => prev.filter((s) => s.id !== sub.id));
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-          },
-        },
-      ]
-    );
+    const title = `Cancel ${sub.name}?`;
+    const body = `Save $${(sub.amount * 12).toFixed(0)}/yr — we'll guide you to ${sub.name}'s cancel page.`;
+
+    if (Platform.OS === "web") {
+      if (typeof window !== "undefined" && window.confirm(`${title}\n\n${body}`)) {
+        confirmCancel(sub);
+      }
+      return;
+    }
+
+    Alert.alert(title, body, [
+      { text: "Not now", style: "cancel" },
+      {
+        text: "Cancel subscription",
+        style: "destructive",
+        onPress: () => confirmCancel(sub),
+      },
+    ]);
   };
 
   return (
