@@ -80,7 +80,8 @@ export default function SubscriptionsDetailScreen() {
       </View>
 
       <ScrollView
-        contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 40 }}
+        style={{ flex: 1 }}
+        contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 60 }}
         showsVerticalScrollIndicator={false}
       >
         <View style={[styles.summaryCard, { backgroundColor: colors.navy }]}>
