@@ -1,5 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   FlatList,
@@ -50,7 +51,10 @@ function TransactionRow({ tx }: { tx: Transaction }) {
         styles.txRow,
         { backgroundColor: pressed ? colors.muted : colors.card, borderColor: colors.border },
       ]}
-      onPress={() => Haptics.selectionAsync()}
+      onPress={() => {
+        Haptics.selectionAsync();
+        router.push({ pathname: "/transaction-detail", params: { id: tx.id } });
+      }}
     >
       <View style={[styles.txIcon, { backgroundColor: alignCfg.bg }]}>
         <Feather name={icon} size={16} color={alignCfg.color} />
@@ -84,10 +88,25 @@ function SpendCategoryBar() {
   ];
 
   return (
-    <View style={[styles.spendCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+    <Pressable
+      style={({ pressed }) => [
+        styles.spendCard,
+        {
+          backgroundColor: pressed ? colors.muted : colors.card,
+          borderColor: colors.border,
+        },
+      ]}
+      onPress={() => {
+        Haptics.selectionAsync();
+        router.push("/spending-detail");
+      }}
+    >
       <View style={styles.spendHeader}>
-        <Text style={[styles.spendTitle, { color: colors.navy }]}>May Spending Pulse</Text>
-        <Text style={[styles.spendSub, { color: colors.mutedForeground }]}>$2,774 so far</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={[styles.spendTitle, { color: colors.navy }]}>May Spending Pulse</Text>
+          <Text style={[styles.spendSub, { color: colors.mutedForeground }]}>$2,774 so far</Text>
+        </View>
+        <Feather name="chevron-right" size={18} color={colors.mutedForeground} />
       </View>
       {cats.map((c) => {
         const pct = Math.min((c.amount / c.total) * 100, 100);
@@ -104,7 +123,7 @@ function SpendCategoryBar() {
           </View>
         );
       })}
-    </View>
+    </Pressable>
   );
 }
 
@@ -117,10 +136,24 @@ function SubscriptionCard() {
   ];
 
   return (
-    <View style={[styles.subCard, { backgroundColor: colors.cautionLight, borderColor: colors.caution, borderWidth: 1 }]}>
+    <Pressable
+      style={({ pressed }) => [
+        styles.subCard,
+        {
+          backgroundColor: pressed ? colors.muted : colors.cautionLight,
+          borderColor: colors.caution,
+          borderWidth: 1,
+        },
+      ]}
+      onPress={() => {
+        Haptics.selectionAsync();
+        router.push("/subscriptions-detail");
+      }}
+    >
       <View style={styles.subHeader}>
         <Feather name="repeat" size={16} color={colors.caution} />
         <Text style={[styles.subTitle, { color: colors.caution }]}>3 subscriptions detected</Text>
+        <Feather name="chevron-right" size={16} color={colors.caution} style={{ marginLeft: "auto" }} />
       </View>
       {subs.map((s) => (
         <View key={s.name} style={styles.subRow}>
@@ -135,7 +168,7 @@ function SubscriptionCard() {
         </View>
       ))}
       <Text style={[styles.subTotal, { color: colors.caution }]}>Total: $52.97/mo</Text>
-    </View>
+    </Pressable>
   );
 }
 

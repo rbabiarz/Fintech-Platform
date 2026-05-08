@@ -36,6 +36,18 @@ function RootLayoutNav() {
         name="goal-editor"
         options={{ presentation: "modal", animation: "slide_from_bottom" }}
       />
+      <Stack.Screen
+        name="spending-detail"
+        options={{ presentation: "modal", animation: "slide_from_bottom" }}
+      />
+      <Stack.Screen
+        name="subscriptions-detail"
+        options={{ presentation: "modal", animation: "slide_from_bottom" }}
+      />
+      <Stack.Screen
+        name="transaction-detail"
+        options={{ presentation: "modal", animation: "slide_from_bottom" }}
+      />
     </Stack>
   );
 }
