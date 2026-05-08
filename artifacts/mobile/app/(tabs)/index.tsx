@@ -1,10 +1,7 @@
 import { Feather } from "@expo/vector-icons";
-import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
-  Alert,
-  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -37,7 +34,7 @@ const STATUS_CONFIG: Record<GoalStatus, { label: string; color: string; bg: stri
   "at-risk": { label: "At Risk", color: "#B91C1C", bg: "#FEE2E2" },
 };
 
-function GoalCard({ goal, onMenu }: { goal: Goal; onMenu: (g: Goal) => void }) {
+function GoalCard({ goal }: { goal: Goal }) {
   const colors = useColors();
   const progress = Math.min(goal.currentAmount / goal.targetAmount, 1);
   const statusCfg = STATUS_CONFIG[goal.status];
@@ -59,17 +56,6 @@ function GoalCard({ goal, onMenu }: { goal: Goal; onMenu: (g: Goal) => void }) {
         <View style={[styles.statusPill, { backgroundColor: statusCfg.bg }]}>
           <Text style={[styles.statusLabel, { color: statusCfg.color }]}>{statusCfg.label}</Text>
         </View>
-        <TouchableOpacity
-          onPress={(e) => {
-            e.stopPropagation();
-            Haptics.selectionAsync();
-            onMenu(goal);
-          }}
-          style={styles.menuBtn}
-          hitSlop={10}
-        >
-          <Feather name="more-vertical" size={18} color={colors.mutedForeground} />
-        </TouchableOpacity>
       </View>
 
       <View style={styles.progressRow}>
@@ -217,35 +203,13 @@ function NextActionCard() {
 export default function GoalsScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { goals, alignmentScore, alignmentTrend, userName, deleteGoal, toggleGoalHidden } = useAppContext();
+  const { goals, alignmentScore, alignmentTrend, userName } = useAppContext();
 
   const visibleGoals = goals.filter((g) => !g.hidden);
   const hiddenGoals = goals.filter((g) => g.hidden);
   const today = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
 
-  const [menuGoal, setMenuGoal] = useState<Goal | null>(null);
   const [showHidden, setShowHidden] = useState(false);
-
-  const closeMenu = () => setMenuGoal(null);
-
-  const handleDelete = (g: Goal) => {
-    closeMenu();
-    Alert.alert(
-      "Delete goal?",
-      `"${g.title}" will be removed permanently.`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: () => {
-            deleteGoal(g.id);
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-          },
-        },
-      ]
-    );
-  };
 
   return (
     <ScrollView
@@ -286,25 +250,8 @@ export default function GoalsScreen() {
       </View>
 
       {visibleGoals.map((goal) => (
-        <GoalCard key={goal.id} goal={goal} onMenu={setMenuGoal} />
+        <GoalCard key={goal.id} goal={goal} />
       ))}
-
-      <TouchableOpacity
-        style={[styles.addGoalCard, { borderColor: colors.primary }]}
-        onPress={() => router.push("/goal-editor")}
-        activeOpacity={0.7}
-      >
-        <View style={[styles.addGoalIcon, { backgroundColor: "#EBF8F8" }]}>
-          <Feather name="plus" size={20} color={colors.primary} />
-        </View>
-        <View style={{ flex: 1 }}>
-          <Text style={[styles.addGoalTitle, { color: colors.navy }]}>Add a new goal</Text>
-          <Text style={[styles.addGoalSub, { color: colors.mutedForeground }]}>
-            Pick a template or build your own
-          </Text>
-        </View>
-        <Feather name="chevron-right" size={20} color={colors.mutedForeground} />
-      </TouchableOpacity>
 
       {hiddenGoals.length > 0 && (
         <>
@@ -324,7 +271,7 @@ export default function GoalsScreen() {
           {showHidden &&
             hiddenGoals.map((goal) => (
               <View key={goal.id} style={{ opacity: 0.6 }}>
-                <GoalCard goal={goal} onMenu={setMenuGoal} />
+                <GoalCard goal={goal} />
               </View>
             ))}
         </>
@@ -356,73 +303,6 @@ export default function GoalsScreen() {
         </View>
       ))}
 
-      <Modal
-        transparent
-        visible={menuGoal !== null}
-        animationType="fade"
-        onRequestClose={closeMenu}
-      >
-        <Pressable style={styles.modalBackdrop} onPress={closeMenu}>
-          <Pressable
-            style={[
-              styles.menuSheet,
-              { backgroundColor: colors.card, paddingBottom: insets.bottom + 12 },
-            ]}
-            onPress={(e) => e.stopPropagation()}
-          >
-            <View style={[styles.menuHandle, { backgroundColor: colors.border }]} />
-            {menuGoal && (
-              <>
-                <View style={styles.menuHeader}>
-                  <Text style={styles.menuEmoji}>{menuGoal.emoji}</Text>
-                  <Text style={[styles.menuTitle, { color: colors.navy }]} numberOfLines={1}>
-                    {menuGoal.title}
-                  </Text>
-                </View>
-                <TouchableOpacity
-                  style={styles.menuItem}
-                  onPress={() => {
-                    const id = menuGoal.id;
-                    closeMenu();
-                    router.push({ pathname: "/goal-editor", params: { id } });
-                  }}
-                >
-                  <Feather name="edit-2" size={18} color={colors.text} />
-                  <Text style={[styles.menuItemText, { color: colors.text }]}>Edit goal</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.menuItem}
-                  onPress={() => {
-                    toggleGoalHidden(menuGoal.id);
-                    closeMenu();
-                  }}
-                >
-                  <Feather
-                    name={menuGoal.hidden ? "eye" : "eye-off"}
-                    size={18}
-                    color={colors.text}
-                  />
-                  <Text style={[styles.menuItemText, { color: colors.text }]}>
-                    {menuGoal.hidden ? "Show on dashboard" : "Hide from list"}
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.menuItem}
-                  onPress={() => handleDelete(menuGoal)}
-                >
-                  <Feather name="trash-2" size={18} color={colors.caution} />
-                  <Text style={[styles.menuItemText, { color: colors.caution }]}>Delete goal</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={[styles.menuItem, styles.menuCancel]} onPress={closeMenu}>
-                  <Text style={[styles.menuItemText, { color: colors.mutedForeground, textAlign: "center", flex: 1 }]}>
-                    Cancel
-                  </Text>
-                </TouchableOpacity>
-              </>
-            )}
-          </Pressable>
-        </Pressable>
-      </Modal>
     </ScrollView>
   );
 }
@@ -522,22 +402,7 @@ const styles = StyleSheet.create({
   goalFooter: { flexDirection: "row", justifyContent: "space-between" },
   goalSaved: { fontSize: 13, fontWeight: "600" },
   goalContrib: { fontSize: 12 },
-  menuBtn: { padding: 4, marginLeft: 2 },
   addGoalLink: { flexDirection: "row", alignItems: "center", gap: 4 },
-  addGoalCard: {
-    marginHorizontal: 20,
-    marginBottom: 12,
-    borderRadius: 14,
-    borderWidth: 1.5,
-    borderStyle: "dashed",
-    padding: 14,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  addGoalIcon: { width: 38, height: 38, borderRadius: 19, alignItems: "center", justifyContent: "center" },
-  addGoalTitle: { fontSize: 14, fontWeight: "700" },
-  addGoalSub: { fontSize: 12, marginTop: 2 },
   hiddenToggle: {
     flexDirection: "row",
     alignItems: "center",
@@ -548,37 +413,6 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   hiddenToggleText: { fontSize: 13, fontWeight: "600" },
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: "rgba(15,42,74,0.45)",
-    justifyContent: "flex-end",
-  },
-  menuSheet: {
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingTop: 8,
-    paddingHorizontal: 8,
-  },
-  menuHandle: { width: 40, height: 4, borderRadius: 2, alignSelf: "center", marginBottom: 8 },
-  menuHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-  },
-  menuEmoji: { fontSize: 22 },
-  menuTitle: { fontSize: 15, fontWeight: "700", flex: 1 },
-  menuItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    paddingVertical: 14,
-    paddingHorizontal: 14,
-    borderRadius: 10,
-  },
-  menuItemText: { fontSize: 15, fontWeight: "600" },
-  menuCancel: { marginTop: 4, justifyContent: "center" },
   actionCard: {
     marginHorizontal: 20,
     marginBottom: 12,

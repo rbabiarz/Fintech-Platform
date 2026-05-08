@@ -51,7 +51,7 @@ export default function GoalEditorScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ id?: string }>();
-  const { goals, addGoal, updateGoal, deleteGoal } = useAppContext();
+  const { goals, addGoal, updateGoal, deleteGoal, toggleGoalHidden } = useAppContext();
 
   const editingGoal = useMemo(
     () => (params.id ? goals.find((g) => g.id === params.id) : undefined),
@@ -334,15 +334,35 @@ export default function GoalEditorScreen() {
           </View>
         </View>
 
-        {isEditing && (
-          <TouchableOpacity
-            style={[styles.deleteBtn, { borderColor: colors.caution }]}
-            onPress={handleDelete}
-            activeOpacity={0.75}
-          >
-            <Feather name="trash-2" size={16} color={colors.caution} />
-            <Text style={[styles.deleteText, { color: colors.caution }]}>Delete goal</Text>
-          </TouchableOpacity>
+        {isEditing && editingGoal && (
+          <>
+            <TouchableOpacity
+              style={[styles.secondaryBtn, { borderColor: colors.border }]}
+              onPress={() => {
+                toggleGoalHidden(editingGoal.id);
+                Haptics.selectionAsync();
+                router.back();
+              }}
+              activeOpacity={0.75}
+            >
+              <Feather
+                name={editingGoal.hidden ? "eye" : "eye-off"}
+                size={16}
+                color={colors.text}
+              />
+              <Text style={[styles.deleteText, { color: colors.text }]}>
+                {editingGoal.hidden ? "Show on dashboard" : "Hide from list"}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.deleteBtn, { borderColor: colors.caution }]}
+              onPress={handleDelete}
+              activeOpacity={0.75}
+            >
+              <Feather name="trash-2" size={16} color={colors.caution} />
+              <Text style={[styles.deleteText, { color: colors.caution }]}>Delete goal</Text>
+            </TouchableOpacity>
+          </>
         )}
       </ScrollView>
 
@@ -416,7 +436,7 @@ const styles = StyleSheet.create({
   summaryEmoji: { fontSize: 32 },
   summaryTitle: { fontSize: 16, fontWeight: "700" },
   summarySub: { fontSize: 13, marginTop: 3 },
-  deleteBtn: {
+  secondaryBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -425,6 +445,16 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingVertical: 13,
     marginTop: 16,
+  },
+  deleteBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingVertical: 13,
+    marginTop: 10,
   },
   deleteText: { fontSize: 14, fontWeight: "700" },
   footer: {
