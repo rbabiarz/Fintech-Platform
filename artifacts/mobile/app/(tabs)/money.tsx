@@ -168,7 +168,9 @@ function SubscriptionCard() {
           <Text style={[styles.subAmt, { color: colors.mutedForeground }]}>${s.amount}/mo</Text>
         </View>
       ))}
-      <Text style={[styles.subTotal, { color: colors.caution }]}>Total: $52.97/mo</Text>
+      <Text style={[styles.subTotal, { color: colors.caution, borderTopColor: colors.caution + "33" }]}>
+        Total: $52.97/mo
+      </Text>
     </Pressable>
   );
 }
@@ -325,34 +327,38 @@ const styles = StyleSheet.create({
   },
   spendCard: {
     marginHorizontal: 20,
-    marginBottom: 12,
+    marginBottom: 14,
     borderRadius: 14,
     borderWidth: 1,
-    padding: 16,
+    paddingHorizontal: 18,
+    paddingTop: 18,
+    paddingBottom: 8,
   },
-  spendHeader: { flexDirection: "row", justifyContent: "space-between", marginBottom: 14 },
+  spendHeader: { flexDirection: "row", justifyContent: "space-between", marginBottom: 18 },
   spendTitle: { fontSize: 15, fontWeight: "700" },
-  spendSub: { fontSize: 13 },
-  catRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 },
-  catName: { fontSize: 12, width: 90 },
+  spendSub: { fontSize: 13, marginTop: 6 },
+  catRow: { flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 14 },
+  catName: { fontSize: 13, width: 100 },
   catBarBg: { flex: 1, height: 6, borderRadius: 3, overflow: "hidden" },
   catBarFill: { height: 6, borderRadius: 3 },
-  catAmt: { fontSize: 12, width: 36, textAlign: "right" },
+  catAmt: { fontSize: 13, fontWeight: "600", minWidth: 56, textAlign: "right" },
   subCard: {
     marginHorizontal: 20,
-    marginBottom: 12,
+    marginBottom: 14,
     borderRadius: 14,
-    padding: 16,
+    paddingHorizontal: 18,
+    paddingTop: 18,
+    paddingBottom: 18,
   },
-  subHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 12 },
+  subHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 16 },
   subTitle: { fontSize: 14, fontWeight: "700" },
-  subRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 },
+  subRow: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 12 },
   subDot: { width: 8, height: 8, borderRadius: 4 },
   subName: { flex: 1, fontSize: 13 },
-  subAmt: { fontSize: 13, fontWeight: "600" },
-  inactivePill: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8 },
+  subAmt: { fontSize: 13, fontWeight: "600", minWidth: 76, textAlign: "right" },
+  inactivePill: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
   inactiveText: { fontSize: 10, fontWeight: "600" },
-  subTotal: { fontSize: 12, fontWeight: "700", marginTop: 4 },
+  subTotal: { fontSize: 12, fontWeight: "700", marginTop: 8, paddingTop: 12, borderTopWidth: 1 },
   filterRow: { flexDirection: "row", gap: 8, paddingHorizontal: 20, marginBottom: 14 },
   filterBtn: {
     paddingHorizontal: 14,

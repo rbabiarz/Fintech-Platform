@@ -1,5 +1,6 @@
+import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 
 export type GoalStatus = "ahead" | "on-track" | "slightly-behind" | "at-risk";
 
@@ -59,6 +60,27 @@ export interface ConnectedAccount {
   lastSync: string;
 }
 
+export interface BudgetCategoryMeta {
+  name: string;
+  color: string;
+  icon: React.ComponentProps<typeof Feather>["name"];
+  spent: number;
+  trend: number;
+  recommendedBudget: number;
+}
+
+export const BUDGET_CATEGORIES: BudgetCategoryMeta[] = [
+  { name: "Groceries", color: "#2C7A7B", icon: "shopping-bag", spent: 152, trend: -8, recommendedBudget: 600 },
+  { name: "Dining", color: "#B45309", icon: "coffee", spent: 204, trend: 31, recommendedBudget: 250 },
+  { name: "Investing", color: "#15803D", icon: "bar-chart-2", spent: 2200, trend: 0, recommendedBudget: 2200 },
+  { name: "Shopping", color: "#64748B", icon: "package", spent: 99, trend: -12, recommendedBudget: 300 },
+  { name: "Subscriptions", color: "#8B5CF6", icon: "repeat", spent: 35, trend: 0, recommendedBudget: 60 },
+  { name: "Transport", color: "#0F2A4A", icon: "map-pin", spent: 84, trend: -22, recommendedBudget: 200 },
+  { name: "Health & Fitness", color: "#15803D", icon: "activity", spent: 189, trend: 5, recommendedBudget: 200 },
+];
+
+export const MONTHLY_INCOME = 6800;
+
 interface AppState {
   goals: Goal[];
   transactions: Transaction[];
@@ -72,6 +94,9 @@ interface AppState {
   totalInvested: number;
   totalDebt: number;
   userName: string;
+  monthlyIncome: number;
+  budgets: Record<string, number>;
+  budgetCategories: BudgetCategoryMeta[];
 }
 
 interface AppContextType extends AppState {
@@ -80,6 +105,8 @@ interface AppContextType extends AppState {
   addGoal: (goal: Omit<Goal, "id">) => string;
   deleteGoal: (id: string) => void;
   toggleGoalHidden: (id: string) => void;
+  setBudget: (categoryName: string, value: number) => void;
+  resetBudgets: () => void;
 }
 
 const MOCK_GOALS: Goal[] = [
@@ -207,9 +234,28 @@ const MOCK_ACCOUNTS: ConnectedAccount[] = [
 
 const AppContext = createContext<AppContextType | null>(null);
 
+function defaultBudgets(): Record<string, number> {
+  return BUDGET_CATEGORIES.reduce<Record<string, number>>((acc, c) => {
+    acc[c.name] = c.recommendedBudget;
+    return acc;
+  }, {});
+}
+
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [goals, setGoals] = useState<Goal[]>(MOCK_GOALS);
   const [alerts, setAlerts] = useState<Alert[]>(MOCK_ALERTS);
+  const [budgets, setBudgets] = useState<Record<string, number>>(defaultBudgets);
+
+  const setBudget = useCallback((categoryName: string, value: number) => {
+    setBudgets((prev) => ({
+      ...prev,
+      [categoryName]: Math.max(0, Math.round(value)),
+    }));
+  }, []);
+
+  const resetBudgets = useCallback(() => {
+    setBudgets(defaultBudgets());
+  }, []);
 
   const markAlertRead = (id: string) => {
     setAlerts((prev) =>
@@ -255,11 +301,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         totalInvested: 287400,
         totalDebt: 2340,
         userName: "Sarah",
+        monthlyIncome: MONTHLY_INCOME,
+        budgets,
+        budgetCategories: BUDGET_CATEGORIES,
         markAlertRead,
         updateGoal,
         addGoal,
         deleteGoal,
         toggleGoalHidden,
+        setBudget,
+        resetBudgets,
       }}
     >
       {children}

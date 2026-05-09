@@ -128,13 +128,26 @@ function getPreviewPath(): string | null {
   return match ? match[1] : null;
 }
 
+function getFirstPreviewPath(modules: ModuleMap): string | null {
+  const firstKey = Object.keys(modules)[0];
+  if (!firstKey) {
+    return null;
+  }
+
+  return firstKey
+    .replace(/^\.\/components\/mockups\//, "")
+    .replace(/\.tsx$/, "");
+}
+
 function App() {
   const previewPath = getPreviewPath();
+  const defaultPreviewPath = getFirstPreviewPath(discoveredModules);
+  const pathToRender = previewPath ?? defaultPreviewPath;
 
-  if (previewPath) {
+  if (pathToRender) {
     return (
       <PreviewRenderer
-        componentPath={previewPath}
+        componentPath={pathToRender}
         modules={discoveredModules}
       />
     );

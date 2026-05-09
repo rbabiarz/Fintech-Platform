@@ -1,4 +1,5 @@
 import { Feather } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React from "react";
 import {
@@ -111,10 +112,13 @@ export default function RebalanceDetailScreen() {
         <TouchableOpacity
           style={[styles.cta, { backgroundColor: colors.navy }]}
           activeOpacity={0.85}
-          onPress={() => router.back()}
+          onPress={() => {
+            Haptics.selectionAsync();
+            router.push("/rebalance-plan");
+          }}
         >
           <Feather name="shuffle" size={16} color="#fff" />
-          <Text style={styles.ctaText}>Plan a rebalance</Text>
+          <Text style={styles.ctaText}>Plan a Rebalance</Text>
         </TouchableOpacity>
 
         <View style={[styles.disc, { backgroundColor: colors.muted }]}>

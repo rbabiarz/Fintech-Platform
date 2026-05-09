@@ -1,4 +1,5 @@
 import { Feather } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -11,28 +12,25 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { useAppContext } from "@/context/AppContext";
 import { useColors } from "@/hooks/useColors";
-
-const CATEGORIES = [
-  { name: "Groceries", spent: 152, budget: 600, color: "#2C7A7B", icon: "shopping-bag" as const, trend: -8 },
-  { name: "Dining", spent: 204, budget: 250, color: "#B45309", icon: "coffee" as const, trend: 31 },
-  { name: "Investing", spent: 2200, budget: 2200, color: "#15803D", icon: "bar-chart-2" as const, trend: 0 },
-  { name: "Shopping", spent: 99, budget: 300, color: "#64748B", icon: "package" as const, trend: -12 },
-  { name: "Subscriptions", spent: 35, budget: 60, color: "#8B5CF6", icon: "repeat" as const, trend: 0 },
-  { name: "Transport", spent: 84, budget: 200, color: "#0F2A4A", icon: "map-pin" as const, trend: -22 },
-  { name: "Health & Fitness", spent: 189, budget: 200, color: "#15803D", icon: "activity" as const, trend: 5 },
-];
 
 const PERIODS = ["This month", "Last month", "Last 3 months"] as const;
 
 export default function SpendingDetailScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const { budgetCategories, budgets } = useAppContext();
   const [period, setPeriod] = useState<typeof PERIODS[number]>("This month");
 
-  const totalSpent = CATEGORIES.reduce((s, c) => s + c.spent, 0);
-  const totalBudget = CATEGORIES.reduce((s, c) => s + c.budget, 0);
-  const pct = Math.round((totalSpent / totalBudget) * 100);
+  const categories = budgetCategories.map((c) => ({
+    ...c,
+    budget: budgets[c.name] ?? c.recommendedBudget,
+  }));
+
+  const totalSpent = categories.reduce((s, c) => s + c.spent, 0);
+  const totalBudget = categories.reduce((s, c) => s + c.budget, 0);
+  const pct = totalBudget > 0 ? Math.round((totalSpent / totalBudget) * 100) : 0;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -91,7 +89,7 @@ export default function SpendingDetailScreen() {
 
         <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>By category</Text>
 
-        {CATEGORIES.map((c) => {
+        {categories.map((c) => {
           const catPct = Math.min((c.spent / c.budget) * 100, 100);
           const over = c.spent > c.budget;
           return (
@@ -144,7 +142,10 @@ export default function SpendingDetailScreen() {
 
         <TouchableOpacity
           style={[styles.adjustBtn, { backgroundColor: colors.navy }]}
-          onPress={() => router.back()}
+          onPress={() => {
+            Haptics.selectionAsync();
+            router.push("/budget-editor");
+          }}
           activeOpacity={0.85}
         >
           <Feather name="sliders" size={16} color="#fff" />
