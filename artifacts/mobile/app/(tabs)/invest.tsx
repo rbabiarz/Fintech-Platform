@@ -35,7 +35,7 @@ function AllocationBar({ holdings }: { holdings: Holding[] }) {
   const classes = ["equity", "fixed-income", "cash", "alternative"] as const;
   const classData = classes.map((cls) => {
     const val = holdings.filter((h) => h.assetClass === cls).reduce((s, h) => s + h.value, 0);
-    return { cls, val, pct: (val / totalVal) * 100 };
+    return { cls, val, pct: totalVal > 0 ? (val / totalVal) * 100 : 0 };
   });
 
   return (
@@ -80,11 +80,17 @@ function GoalMapping() {
   const colors = useColors();
   const { goals } = useAppContext();
 
-  const mappings = [
-    { goal: goals[1], account: "Vanguard Brokerage", pct: 80 },
-    { goal: goals[0], account: "Marcus HISA", pct: 95 },
-    { goal: goals[2], account: "Chase Checking", pct: 65 },
+  const ACCOUNT_DETAILS: { id: string; account: string; pct: number }[] = [
+    { id: "g2", account: "Vanguard Brokerage", pct: 80 },
+    { id: "g1", account: "Marcus HISA", pct: 95 },
+    { id: "g3", account: "Chase Checking", pct: 65 },
   ];
+  const mappings = ACCOUNT_DETAILS
+    .map(({ id, account, pct }) => {
+      const goal = goals.find((g) => g.id === id);
+      return goal ? { goal, account, pct } : null;
+    })
+    .filter((m): m is { goal: NonNullable<typeof m>["goal"]; account: string; pct: number } => m !== null);
 
   return (
     <View style={[styles.mappingCard, { backgroundColor: colors.card, borderColor: colors.border }]}>

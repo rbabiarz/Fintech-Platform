@@ -42,6 +42,9 @@ export default function AlertImpactScreen() {
   const { alerts, goals } = useAppContext();
 
   const alert = alerts.find((a) => a.id === params.id) ?? alerts[0];
+  if (!alert) {
+    return null;
+  }
   const cfg = ALERT_TYPE_CFG[alert.type];
   const goal = alert.goalId ? goals.find((g) => g.id === alert.goalId) : undefined;
 
@@ -68,12 +71,12 @@ export default function AlertImpactScreen() {
 
   const projection = isPositive
     ? [
-        { label: "Today's pace", value: `${monthsLeft - shiftWeeks / 4 | 0} months to go`, highlight: true },
+        { label: "Today's pace", value: `${monthsLeft - Math.floor(shiftWeeks / 4)} months to go`, highlight: true },
         { label: "Original target", value: `${monthsLeft} months`, highlight: false },
       ]
     : [
         { label: "Original target", value: `${monthsLeft} months`, highlight: false },
-        { label: "Current trajectory", value: `${monthsLeft + shiftWeeks / 4 | 0} months`, highlight: true },
+        { label: "Current trajectory", value: `${monthsLeft + Math.floor(shiftWeeks / 4)} months`, highlight: true },
       ];
 
   return (

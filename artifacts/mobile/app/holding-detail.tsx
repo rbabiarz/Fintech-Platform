@@ -38,17 +38,12 @@ export default function HoldingDetailScreen() {
 
   const holding = holdings.find((h) => h.id === params.id) ?? holdings[0];
   const isPositive = holding.change >= 0;
-  const shares = (holding.value / 142.18).toFixed(3);
-  const costBasis = holding.value - holding.change * 12;
-  const totalReturn = holding.value - costBasis;
-  const totalReturnPct = (totalReturn / costBasis) * 100;
 
   const facts = [
     { label: "Asset class", value: CLASS_LABELS[holding.assetClass] },
     { label: "Portfolio weight", value: `${holding.allocation}%` },
-    { label: "Shares held", value: shares },
-    { label: "Avg. cost basis", value: `$${(costBasis / parseFloat(shares)).toFixed(2)}` },
-    { label: "Total return", value: `${isPositive ? "+" : ""}${formatCurrency(totalReturn)} (${totalReturnPct.toFixed(2)}%)` },
+    { label: "Total value", value: formatCurrency(holding.value) },
+    { label: "Today's change", value: `${isPositive ? "+" : ""}${formatCurrency(holding.change)} (${holding.changePercent.toFixed(2)}%)` },
     { label: "Expense ratio", value: holding.assetClass === "equity" ? "0.04%" : holding.assetClass === "fixed-income" ? "0.05%" : "0.11%" },
   ];
 

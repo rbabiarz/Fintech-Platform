@@ -124,8 +124,14 @@ export default function BudgetEditorScreen() {
       setBudget(c.name, draft[c.name] ?? 0);
     }
     setSavedAt(Date.now());
-    setTimeout(() => router.back(), 480);
   }
+
+  // Navigate back after save, with cleanup on unmount
+  useEffect(() => {
+    if (!savedAt) return;
+    const timer = setTimeout(() => router.back(), 480);
+    return () => clearTimeout(timer);
+  }, [savedAt]);
 
   // Saved toast animation
   const toastY = useRef(new Animated.Value(40)).current;

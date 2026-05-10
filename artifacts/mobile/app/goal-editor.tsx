@@ -40,6 +40,7 @@ function formatMoney(n: number) {
 }
 
 function deriveStatus(current: number, target: number): GoalStatus {
+  if (!target) return "at-risk";
   const pct = current / target;
   if (pct >= 0.95) return "ahead";
   if (pct >= 0.6) return "on-track";

@@ -137,7 +137,7 @@ export default function ProfileScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { accounts, userName } = useAppContext();
-  const { resetOnboarding, riskProfile, name } = useOnboarding();
+  const { resetOnboarding, riskProfile, name, email } = useOnboarding();
   const confirm = useConfirm();
 
   const [quietAlerts, setQuietAlerts] = useState(true);
@@ -185,22 +185,34 @@ export default function ProfileScreen() {
     if (ok2) router.replace("/(onboarding)/welcome");
   };
 
+  const userEmail = email || "your registered email";
+
   const handleExport = async () => {
-    await confirm({
+    const ok = await confirm({
       title: "Export your data?",
-      message: "We'll email a download link to sarah.chen@email.com within 24 hours.",
+      message: `We'll email a download link to ${userEmail} within 24 hours.`,
       confirmText: "Request export",
       icon: "download",
+    });
+    if (!ok) return;
+    // Export requested — show confirmation feedback
+    await confirm({
+      title: "Export requested",
+      message: "You'll receive a download link within 24 hours.",
+      confirmText: "Got it",
+      icon: "check-circle",
     });
   };
 
   const handleUpgrade = async () => {
-    await confirm({
+    const ok = await confirm({
       title: "Upgrade to Align Plus",
       message: "Unlock unlimited goals, advanced scenarios, and priority support for $9/mo.",
       confirmText: "See plans",
       icon: "star",
     });
+    if (!ok) return;
+    router.push({ pathname: "/info-detail", params: { topic: "upgrade" } });
   };
 
   const closePicker = () => setPicker(null);
@@ -225,7 +237,7 @@ export default function ProfileScreen() {
           </View>
           <View style={{ flex: 1 }}>
             <Text style={[styles.avatarName, { color: "#fff" }]}>{displayName} Chen</Text>
-            <Text style={[styles.avatarEmail, { color: colors.primaryTint }]}>sarah.chen@email.com</Text>
+            <Text style={[styles.avatarEmail, { color: colors.primaryTint }]}>{userEmail}</Text>
           </View>
           <TouchableOpacity
             style={[styles.premiumBadge, { backgroundColor: colors.primary }]}

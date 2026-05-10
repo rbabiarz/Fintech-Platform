@@ -1,7 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React from "react";
 import {
   Platform,
   ScrollView,
@@ -15,13 +15,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAppContext } from "@/context/AppContext";
 import { useColors } from "@/hooks/useColors";
 
-const PERIODS = ["This month", "Last month", "Last 3 months"] as const;
-
 export default function SpendingDetailScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { budgetCategories, budgets } = useAppContext();
-  const [period, setPeriod] = useState<typeof PERIODS[number]>("This month");
 
   const categories = budgetCategories.map((c) => ({
     ...c,
@@ -47,29 +44,9 @@ export default function SpendingDetailScreen() {
         contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 60 }}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.periodRow}>
-          {PERIODS.map((p) => (
-            <TouchableOpacity
-              key={p}
-              style={[
-                styles.periodChip,
-                {
-                  backgroundColor: period === p ? colors.navy : colors.card,
-                  borderColor: period === p ? colors.navy : colors.border,
-                },
-              ]}
-              onPress={() => setPeriod(p)}
-            >
-              <Text style={{ color: period === p ? "#fff" : colors.text, fontSize: 12, fontWeight: "600" }}>
-                {p}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
         <View style={[styles.summaryCard, { backgroundColor: colors.navy }]}>
           <Text style={{ color: "#B2DFDB", fontSize: 12, fontWeight: "700", letterSpacing: 0.6 }}>
-            TOTAL SPENT · {period.toUpperCase()}
+            TOTAL SPENT · THIS MONTH
           </Text>
           <Text style={{ color: "#fff", fontSize: 36, fontWeight: "700", marginTop: 6 }}>
             ${totalSpent.toLocaleString()}
@@ -90,7 +67,7 @@ export default function SpendingDetailScreen() {
         <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>By category</Text>
 
         {categories.map((c) => {
-          const catPct = Math.min((c.spent / c.budget) * 100, 100);
+          const catPct = c.budget > 0 ? Math.min((c.spent / c.budget) * 100, 100) : 100;
           const over = c.spent > c.budget;
           return (
             <View
@@ -168,8 +145,6 @@ const styles = StyleSheet.create({
   },
   headerTitle: { fontSize: 17, fontWeight: "700" },
   iconBtn: { width: 36, height: 36, alignItems: "center", justifyContent: "center" },
-  periodRow: { flexDirection: "row", gap: 8, marginBottom: 16 },
-  periodChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 18, borderWidth: 1 },
   summaryCard: { borderRadius: 16, padding: 18, marginBottom: 22 },
   summaryBar: { height: 8, borderRadius: 4, marginTop: 14, overflow: "hidden" },
   summaryBarFill: { height: 8, borderRadius: 4 },

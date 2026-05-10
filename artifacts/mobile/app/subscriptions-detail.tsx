@@ -28,6 +28,9 @@ interface Sub {
   flagged: boolean;
 }
 
+// TODO (H-02): Subscription data and cancel actions are local state only.
+// Cancelling a subscription here does not update AppContext or the Money screen summary card.
+// Move subscriptions into AppContext with a cancelSubscription action to keep both screens in sync.
 const INITIAL: Sub[] = [
   { id: "s1", name: "Spotify Premium", category: "Music", amount: 11.99, cycle: "Monthly", lastUsed: "Today", active: true, flagged: false },
   { id: "s2", name: "Netflix", category: "Streaming", amount: 22.99, cycle: "Monthly", lastUsed: "Yesterday", active: true, flagged: false },

@@ -54,7 +54,13 @@ export default function TransactionDetailScreen() {
   const [category, setCategory] = useState(tx?.category ?? "");
   const [linkedGoalId, setLinkedGoalId] = useState<string | null>(null);
 
-  if (!tx) return null;
+  if (!tx) {
+    return (
+      <View style={[styles.container, { backgroundColor: colors.background, alignItems: "center", justifyContent: "center" }]}>
+        <Text style={{ color: colors.mutedForeground, fontSize: 14 }}>Transaction not found.</Text>
+      </View>
+    );
+  }
   const cfg = ALIGNMENT_CONFIG[tx.alignment];
   const icon = (CATEGORY_ICONS[tx.category] ?? "circle") as any;
 
