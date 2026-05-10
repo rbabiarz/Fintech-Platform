@@ -168,9 +168,16 @@ function SubscriptionCard() {
           <Text style={[styles.subAmt, { color: colors.mutedForeground }]}>${s.amount}/mo</Text>
         </View>
       ))}
-      <Text style={[styles.subTotal, { color: colors.caution, borderTopColor: colors.caution + "33" }]}>
-        Total: $52.97/mo
-      </Text>
+      <View
+        style={[
+          styles.subTotalWrap,
+          { borderTopColor: colors.caution + "33" },
+        ]}
+      >
+        <Text style={[styles.subTotal, { color: colors.caution }]}>
+          Total: $52.97/mo
+        </Text>
+      </View>
     </Pressable>
   );
 }
@@ -358,7 +365,8 @@ const styles = StyleSheet.create({
   subAmt: { fontSize: 13, fontWeight: "600", minWidth: 76, textAlign: "right" },
   inactivePill: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
   inactiveText: { fontSize: 10, fontWeight: "600" },
-  subTotal: { fontSize: 12, fontWeight: "700", marginTop: 8, paddingTop: 12, borderTopWidth: 1 },
+  subTotalWrap: { marginTop: 8, paddingTop: 12, borderTopWidth: 1 },
+  subTotal: { fontSize: 12, fontWeight: "700" },
   filterRow: { flexDirection: "row", gap: 8, paddingHorizontal: 20, marginBottom: 14 },
   filterBtn: {
     paddingHorizontal: 14,
