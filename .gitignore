@@ -45,6 +45,9 @@ Thumbs.db
 .github/instructions/nx.instructions.md
 
 # Replit
+.replit
+replit.md
+replit.nix
 .cache/
 .local/
 attached_assets/
