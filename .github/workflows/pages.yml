@@ -33,16 +33,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
 
-      - name: Build mockup sandbox
-        working-directory: artifacts/mockup-sandbox
+      - name: Build Expo web app
+        working-directory: artifacts/mobile
         env:
-          NODE_ENV: production
-          BASE_PATH: /Fintech-Platform/
-        run: pnpm build
+          EXPO_BASE_URL: /Fintech-Platform/
+        run: pnpm exec expo export --platform web --output-dir dist-web
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: artifacts/mockup-sandbox/dist
+          path: artifacts/mobile/dist-web
 
   deploy:
     needs: build
