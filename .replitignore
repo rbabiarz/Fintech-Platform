@@ -3,3 +3,6 @@
 
 # No need to store the pnpm store twice.
 .local
+
+# Replit chat uploads — not part of the build (PRD/screenshots, etc.).
+attached_assets
