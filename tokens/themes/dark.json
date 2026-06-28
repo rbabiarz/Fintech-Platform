@@ -1,0 +1,14 @@
+{
+  "_comment": "Tier 3 — dark theme. PROPOSED, not yet implemented. artifacts/mobile/constants/colors.ts ships light-only today. These are a starting proposal for a navy-grounded dark mode that keeps the calm/trust character; values need contrast verification before build. Tracked in docs/open-questions.md (Q: dark mode).",
+  "_status": "proposed",
+  "color": {
+    "bg.page": "{palette.navy.900}",
+    "bg.card": "#16314F",
+    "bg.muted": "#1E3A5C",
+    "fg.default": "#E2E8F0",
+    "fg.muted": "#94A3B8",
+    "fg.heading": "#FFFFFF",
+    "brand.default": "{palette.teal.100}",
+    "border.default": "#2A456A"
+  }
+}

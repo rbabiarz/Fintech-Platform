@@ -103,6 +103,22 @@ scripts/            # Workspace tooling
 
 ---
 
+## Design & Product Workspace
+
+Alongside the app, the repo carries a product-design deep-dive workspace so the design
+intent lives next to the code that implements it:
+
+| Path | What's there |
+|------|--------------|
+| [`DESIGN.md`](DESIGN.md) | North star, product principles, palette, motion |
+| [`design-tokens.json`](design-tokens.json) · [`tokens/`](tokens/) | Three-tier design tokens (primitives → semantic → light/dark), mirroring `artifacts/mobile/constants/colors.ts` |
+| [`design-system/`](design-system/) | Foundations, component inventory, patterns, usage guidelines |
+| [`docs/`](docs/) | Brief, PRD, ADR decision log, personas, information architecture, success metrics, constraints, open questions |
+| [`.claude/rules/`](.claude/rules/) | Design-system, accessibility, code-style, and content-voice rules |
+| [`reference/`](reference/) | Research synthesis, brand, moodboards, flows |
+
+---
+
 ## App Screens
 
 **Onboarding** — welcome → signup → goal setup → risk profile → account linking → ready

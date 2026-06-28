@@ -1,0 +1,23 @@
+{
+  "_comment": "Tier 1 — raw values. No semantic meaning. Referenced by semantic.json. Mirrors the palette in artifacts/mobile/constants/colors.ts.",
+  "palette": {
+    "white": "#FFFFFF",
+    "black": "#000000",
+    "teal": { "100": "#B2DFDB", "600": "#2C7A7B" },
+    "navy": { "900": "#0F2A4A" },
+    "sand": { "50": "#FAF7F2", "100": "#F0EDE8", "200": "#F0EDEA" },
+    "slate": { "500": "#64748B", "700": "#334155" },
+    "green": { "50": "#DCFCE7", "600": "#15803D" },
+    "amber": { "50": "#FEF3C7", "600": "#B45309" },
+    "red": { "50": "#FEE2E2", "600": "#B91C1C" },
+    "line": { "default": "#E8E4DE" },
+    "chart": { "violet": "#8B5CF6" }
+  },
+  "scale": { "1": "4px", "2": "8px", "3": "12px", "4": "16px", "5": "20px", "6": "24px", "8": "32px", "12": "48px" },
+  "radius": { "sm": "8px", "md": "12px", "lg": "20px", "pill": "9999px" },
+  "font": {
+    "family": { "sans": "Inter, system-ui, -apple-system, sans-serif" },
+    "weight": { "regular": 400, "medium": 500, "semibold": 600, "bold": 700 },
+    "size": { "xs": "12px", "sm": "14px", "base": "16px", "lg": "18px", "xl": "22px", "2xl": "28px", "display": "34px" }
+  }
+}

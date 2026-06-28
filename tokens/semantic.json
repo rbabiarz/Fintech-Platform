@@ -1,0 +1,43 @@
+{
+  "_comment": "Tier 2 — role-based aliases pointing at primitives. UI references THESE, never raw palette values. Status colors must always pair with an icon and text label — meaning never rides on hue alone (see .claude/rules/accessibility.md).",
+  "color": {
+    "bg.page": "{palette.sand.50}",
+    "bg.card": "{palette.white}",
+    "bg.muted": "{palette.sand.200}",
+    "fg.default": "{palette.slate.700}",
+    "fg.muted": "{palette.slate.500}",
+    "fg.heading": "{palette.navy.900}",
+    "fg.onBrand": "{palette.white}",
+    "brand.default": "{palette.teal.600}",
+    "brand.tint": "{palette.teal.100}",
+    "status.positive": "{palette.green.600}",
+    "status.positive.tint": "{palette.green.50}",
+    "status.caution": "{palette.amber.600}",
+    "status.caution.tint": "{palette.amber.50}",
+    "status.error": "{palette.red.600}",
+    "status.error.tint": "{palette.red.50}",
+    "status.neutral": "{palette.slate.500}",
+    "border.default": "{palette.line.default}",
+    "border.input": "{palette.line.default}"
+  },
+  "alignment": {
+    "_comment": "Per-transaction alignment indicator. Each value carries an icon + label so it reads without color.",
+    "aligned": { "color": "{palette.green.600}", "icon": "check-circle", "label": "Aligned" },
+    "neutral": { "color": "{palette.slate.500}", "icon": "minus-circle", "label": "Neutral" },
+    "out-of-sync": { "color": "{palette.amber.600}", "icon": "alert-circle", "label": "Out of sync" }
+  },
+  "goalStatus": {
+    "_comment": "Goal status pill. Coral/amber is the strongest risk signal — never saturated red for an at-risk goal.",
+    "ahead": { "color": "{palette.green.600}", "label": "Ahead" },
+    "on-track": { "color": "{palette.teal.600}", "label": "On Track" },
+    "slightly-behind": { "color": "{palette.amber.600}", "label": "Slightly Behind" },
+    "at-risk": { "color": "{palette.amber.600}", "label": "At Risk" }
+  },
+  "radius": { "control": "{radius.md}", "card": "{radius.md}", "cta": "{radius.pill}" },
+  "motion": {
+    "duration.fast": "200ms",
+    "duration.base": "240ms",
+    "duration.slow": "280ms",
+    "easing.standard": "cubic-bezier(0.2, 0, 0, 1)"
+  }
+}

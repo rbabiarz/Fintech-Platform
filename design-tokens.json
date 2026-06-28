@@ -1,0 +1,51 @@
+{
+  "_comment": "Align design tokens — top-level convenience export. Source tiers live in tokens/ (primitives -> semantic -> themes). Values mirror artifacts/mobile/constants/colors.ts; that file is the runtime source of truth for the mobile app. Keep the two in sync.",
+  "color": {
+    "bg": {
+      "page": "#FAF7F2",
+      "card": "#FFFFFF",
+      "muted": "#F0EDEA"
+    },
+    "fg": {
+      "default": "#334155",
+      "muted": "#64748B",
+      "heading": "#0F2A4A",
+      "onPrimary": "#FFFFFF"
+    },
+    "brand": {
+      "default": "#2C7A7B",
+      "tint": "#B2DFDB",
+      "onBrand": "#FFFFFF"
+    },
+    "status": {
+      "positive": "#15803D",
+      "positiveTint": "#DCFCE7",
+      "caution": "#B45309",
+      "cautionTint": "#FEF3C7",
+      "error": "#B91C1C",
+      "errorTint": "#FEE2E2",
+      "neutral": "#64748B"
+    },
+    "border": {
+      "default": "#E8E4DE",
+      "input": "#E8E4DE"
+    }
+  },
+  "space": { "1": "4px", "2": "8px", "3": "12px", "4": "16px", "5": "20px", "6": "24px", "8": "32px", "12": "48px" },
+  "radius": { "sm": "8px", "md": "12px", "lg": "20px", "pill": "9999px" },
+  "type": {
+    "family": { "sans": "Inter, system-ui, -apple-system, sans-serif" },
+    "size": { "xs": "12px", "sm": "14px", "base": "16px", "lg": "18px", "xl": "22px", "2xl": "28px", "display": "34px" },
+    "weight": { "regular": 400, "medium": 500, "semibold": 600, "bold": 700 },
+    "feature": { "currency": "tabular figures (font-variant-numeric: tabular-nums)" }
+  },
+  "motion": {
+    "duration": { "fast": "200ms", "base": "240ms", "slow": "280ms" },
+    "easing": { "standard": "cubic-bezier(0.2, 0, 0, 1)" },
+    "_note": "Respect prefers-reduced-motion: render the end state with no transition."
+  },
+  "shadow": {
+    "card": "0 1px 2px rgba(15, 42, 74, 0.06)",
+    "raised": "0 6px 16px rgba(15, 42, 74, 0.10)"
+  }
+}
